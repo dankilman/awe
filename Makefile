@@ -1,5 +1,5 @@
 build-client:
-	cd pages/resources/client/pages && npm run build
+	cd awe/resources/client/awe && npm run build
 
 dev-client:
-	cd pages/resources/client/pages && npm start
+	cd awe/resources/client/awe && npm start

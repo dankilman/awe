@@ -1,4 +1,4 @@
-from pages import Page, inject
+from awe import Page, inject
 
 
 @inject(variables=['input1', 'input2'], elements=['button1'])

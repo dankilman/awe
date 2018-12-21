@@ -1,6 +1,6 @@
 let instance = null;
 
-class Pages {
+class Awe {
   constructor({processor, host, port}) {
     this.processor = processor;
     this.finishedInitialFetch = false;
@@ -8,7 +8,7 @@ class Pages {
     this.ws = new WebSocket(`ws://${host}:${port}`);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = (error) => console.error('ws error', error);
-    Pages.fetchInitialState().then((initialState) => {
+    Awe.fetchInitialState().then((initialState) => {
       this.processor.processInitialState(initialState);
       const {version} = initialState;
       for (const pendingAction of this.pendingActions) {
@@ -22,7 +22,7 @@ class Pages {
   }
 
   static start({processor, host = '127.0.0.1', port = 9000}) {
-    instance = new Pages({processor, host, port});
+    instance = new Awe({processor, host, port});
     return instance;
   }
 
@@ -53,5 +53,5 @@ class Pages {
 
 }
 
-export default Pages;
+export default Awe;
 export {instance};

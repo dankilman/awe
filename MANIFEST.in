@@ -1,1 +1,1 @@
-recursive-include pages/resources/client/pages/build *
+recursive-include awe/resources/client/awe/build *

@@ -1,7 +1,7 @@
 import time
 from random import randint
 
-from pages import Page
+from awe import Page
 
 
 def generate_random_data(size, num_series):

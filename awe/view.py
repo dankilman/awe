@@ -137,7 +137,7 @@ class Element(object):
         return self._new_child(Divider, **kwargs)
 
     def new_chart(self, data=None, options=None, transform=None, moving_window=None, **kwargs):
-        from pages.chart import Chart
+        from .chart import Chart
         return self._new_child(
             Chart,
             data=data,

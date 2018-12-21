@@ -1,6 +1,6 @@
 import time
 
-from pages import Page
+from awe import Page
 
 
 def main():

@@ -9,7 +9,7 @@ class WebServer(object):
     def __init__(self, page, port):
         self._port = port
         self._page = page
-        self._content_root = os.path.join(os.path.dirname(__file__), 'resources', 'client', 'pages', 'build')
+        self._content_root = os.path.join(os.path.dirname(__file__), 'resources', 'client', 'awe', 'build')
         self._app = bottle.Bottle()
         self._app.route('/')(self._index)
         self._app.route('/initial-state')(self._page.get_initial_state)

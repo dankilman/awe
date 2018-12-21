@@ -28,7 +28,7 @@ class Page(view.Element):
         self._ws_server.start()
         self._started = True
         if open_browser:
-            port = 3000 if os.environ.get('PAGES_DEVELOP') else self._port
+            port = 3000 if os.environ.get('AWE_DEVELOP') else self._port
             webbrowser.open_new_tab('http://localhost:{}'.format(port))
         if block:
             self.block()

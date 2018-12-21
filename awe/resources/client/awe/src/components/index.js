@@ -8,7 +8,7 @@ import Table from './Table';
 import Grid from './Grid';
 import Text from './Text'
 import Chart from './Chart';
-import {instance} from '../Pages';
+import {instance} from '../Awe';
 
 const nativeComponents = {
   div: div => (

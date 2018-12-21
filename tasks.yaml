@@ -1,5 +1,5 @@
 - ideas:
-  - pages templates
+  - page templates
   - form api
   - customize page title and favicon
   - improve style:
@@ -10,7 +10,4 @@
   - docs
   - tests
   - comments
-  - pypi
-  - rename
   - dev docs
-

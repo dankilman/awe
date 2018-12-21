@@ -1,7 +1,7 @@
 import {Component} from 'react';
 import {connect} from 'react-redux';
 import components from './components';
-import {instance} from './Pages';
+import {instance} from './Awe';
 import './App.css';
 
 function processElement(element) {
@@ -11,7 +11,8 @@ function processElement(element) {
 
 class App extends Component {
   render() {
-    const {elements, variables, style, updateVariable} = this.props.state.toJS();
+    const {elements, variables, style} = this.props.state.toJS();
+    const {updateVariable} = this.props;
     const sortedElements = Object.values(elements).sort((a, b) => a.index - b.index);
     const rootElement = {elementType: 'div', children: [], props: {style}};
     for (const element of sortedElements) {
