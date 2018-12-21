@@ -3,7 +3,7 @@ import time
 from awe import Page
 
 
-class Full(object):
+class Kitchen(object):
     def __init__(self, parent):
         self.tabs = parent.new_tabs()
         self.tab1 = Tab1(self.tabs)
@@ -61,11 +61,11 @@ class Tab2(object):
 
 def main():
     page = Page()
-    full = Full(page)
+    kitchen = Kitchen(page)
     page.start()
     for i in range(1000):
         print i
-        full.update(i)
+        kitchen.update(i)
         try:
             time.sleep(5)
         except KeyboardInterrupt:

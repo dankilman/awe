@@ -3,3 +3,6 @@ build-client:
 
 dev-client:
 	cd awe/resources/client/awe && npm start
+
+build-package:
+	python setup.py bdist_wheel
