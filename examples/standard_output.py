@@ -9,7 +9,7 @@ def main():
     page.new_text('Header', style={'fontSize': '1.5em', 'color': '#ff0000'})
     for i in range(20):
         page.new_text('{} hello {}'.format(i, i), style={'color': 'blue'})
-        time.sleep(0.1)
+        time.sleep(2)
     page.block()
 
 
