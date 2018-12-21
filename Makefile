@@ -6,3 +6,5 @@ dev-client:
 
 build-package:
 	python setup.py bdist_wheel
+
+build: build-client build-package
