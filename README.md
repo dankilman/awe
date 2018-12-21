@@ -34,7 +34,7 @@ page.start(block=True)
 ```
 
 Which produces this exiting output:
-![image](docs/images/hello_world.png)
+![image](docs/images/hello.png)
 
 
 ## Examples
