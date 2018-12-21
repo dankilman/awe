@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='awe',
     version='0.4',
-    description='Dynamically updated web based reports/dashboards in python',
+    description='Dynamic web based reports/dashboards in python',
     long_description='',
     license='MIT License',
     author='Dan Kilman',
