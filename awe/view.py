@@ -189,6 +189,16 @@ class Table(Element):
             'pagination': {'pageSize': page_size, 'position': 'top'} if page_size else False
         }, override=False)
 
+    def clear(self):
+        if not self.data['rows']:
+            return
+        self.data['rows'] = deque()
+        self.update_data(self.data)
+
+    def set(self, rows):
+        self.data['rows'] = deque([self._row_data(r, i) for i, r in enumerate(rows)])
+        self.update_data(self.data)
+
     def append(self, row):
         self._add_row(row, 'append')
 
@@ -200,14 +210,17 @@ class Table(Element):
             self.append(row)
 
     def _add_row(self, row, action):
-        if isinstance(row, dict):
-            row = [row[h] for h in self.data['headers']]
-        row_data = {'data': row, 'id': len(self.data['rows']) + 1}
+        row_data = self._row_data(row)
         if action == 'append':
             self.data['rows'].append(row_data)
         else:
             self.data['rows'].appendleft(row_data)
         self.update_element(path=['data', 'rows'], action=action, data=row_data)
+
+    def _row_data(self, row, offset=0):
+        if isinstance(row, dict):
+            row = [row[h] for h in self.data['headers']]
+        return {'data': row, 'id': len(self.data['rows']) + 1 + offset}
 
     def prepare_data(self, data):
         result = data.copy()
