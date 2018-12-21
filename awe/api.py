@@ -11,9 +11,10 @@ from . import websocket
 
 class Page(view.Element):
 
-    def __init__(self, port=8080, ws_port=9000, width=None, style=None):
+    def __init__(self, title='Awe', port=8080, ws_port=9000, width=None, style=None):
         super(Page, self).__init__(parent=None, element_id='', props=None, style=None)
         self._port = port
+        self._title = title
         self._style = self._set_default_style(style, width)
         self._registry = registry.Registry()
         self._message_handler = messages.MessageHandler(self._registry, self.dispatch)
@@ -38,7 +39,8 @@ class Page(view.Element):
             'children': [t.get_view() for t in self.children],
             'variables': self._registry.get_variables(),
             'version': self._version,
-            'style': self._style
+            'style': self._style,
+            'title': self._title,
         }
 
     def increase_version(self):

@@ -4,7 +4,8 @@ class Processor {
   }
 
   processInitialState(initialState) {
-    const {variables, children, style} = initialState;
+    const {variables, children, style, title} = initialState;
+    this.processTitle(title);
     this.processStyle(style);
     for (const variable of Object.values(variables)) {
       this.processVariable(variable);
@@ -12,6 +13,10 @@ class Processor {
     for (const child of children) {
       this.processElement(child);
     }
+  }
+
+  processTitle(title) {
+    document.title = title;
   }
 
   processStyle(style) {

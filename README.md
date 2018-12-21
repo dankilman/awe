@@ -33,6 +33,10 @@ page.new_text('Hello World!')
 page.start(block=True)
 ```
 
+Which produces this exiting output:
+![image](docs/images/hello_world.png)
+
+
 ## Examples
 
 ### [`button_and_input.py`](examples/button_and_input.py)

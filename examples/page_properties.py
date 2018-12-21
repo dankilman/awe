@@ -2,7 +2,7 @@ from awe import Page
 
 
 def main():
-    page = Page(width=600, style={
+    page = Page('Page Properties', width=600, style={
         'backgroundColor': 'red'
     })
     page.new_card('hello')
