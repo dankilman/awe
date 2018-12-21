@@ -64,7 +64,7 @@ class Element(object):
         self.data.update(data)
         if not self._init_complete:
             return
-        self.update_element(path=['data'], action='set', data=self.prepare_data(data))
+        self.update_element(path=['data'], action='set', data=self.prepare_data(self.data))
 
     def update_props(self, props, override=True):
         final_props = props
@@ -73,7 +73,7 @@ class Element(object):
         self.props.update(final_props)
         if not self._init_complete:
             return
-        self.update_element(path=['props'], action='set', data=final_props)
+        self.update_element(path=['props'], action='set', data=self.props)
 
     def update_prop(self, path, value):
         if isinstance(path, str):
