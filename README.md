@@ -23,6 +23,16 @@ Under the hood, awe generates the page using react.
 pip install awe
 ```
 
+## Hello World
+The most basic functional example would be something like this:
+```python
+from awe import Page
+
+page = Page()
+page.new_text('Hello World!')
+page.start(block=True)
+```
+
 ## Examples
 
 ### [`button_and_input.py`](examples/button_and_input.py)
