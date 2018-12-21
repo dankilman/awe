@@ -4,7 +4,7 @@ Dynamic web based reports/dashboards in python.
 
 ## Motivation:
 
-awe usa cases:
+awe use cases:
 - Create a report for some data you collected in your scripts.
 - Poll some data/state in your script and update a chart displaying that data.
 - A replacement for print/log statements in your scripts that can include 
