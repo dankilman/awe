@@ -1,0 +1,16 @@
+- ideas:
+  - pages templates
+  - form api
+  - customize page title and favicon
+  - improve style:
+    - css instead of style
+    - themes
+- release:
+  - licensing - special note for highcharts
+  - docs
+  - tests
+  - comments
+  - pypi
+  - rename
+  - dev docs
+
