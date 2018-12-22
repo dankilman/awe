@@ -33,7 +33,7 @@ page.new_text('Hello World!')
 page.start(block=True)
 ```
 
-Which produces this exiting output:
+Which produces this exciting output:
 ![image](docs/images/hello.png)
 
 ## Examples
