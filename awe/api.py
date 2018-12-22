@@ -17,8 +17,8 @@ class Page(view.Element):
         self._title = title
         self._style = self._set_default_style(style, width)
         self._registry = registry.Registry()
-        self._message_handler = messages.MessageHandler(self._registry, self.dispatch)
-        self._server = webserver.WebServer(self, port=port)
+        self._message_handler = messages.MessageHandler(self._registry, self._dispatch)
+        self._server = webserver.WebServer(self._get_initial_state, port=port)
         self._ws_server = websocket.WebSocketServer(self._message_handler, port=ws_port)
         self._started = False
         self._version = 0
@@ -34,23 +34,23 @@ class Page(view.Element):
         if block:
             self.block()
 
-    def get_initial_state(self):
+    def _get_initial_state(self):
         return {
-            'children': [t.get_view() for t in self.children],
+            'children': [t._get_view() for t in self.children],
             'variables': self._registry.get_variables(),
             'version': self._version,
             'style': self._style,
             'title': self._title,
         }
 
-    def increase_version(self):
+    def _increase_version(self):
         self._version += 1
 
-    def register(self, obj, obj_id=None):
+    def _register(self, obj, obj_id=None):
         self._registry.register(obj, obj_id)
 
-    def dispatch(self, action):
-        self.increase_version()
+    def _dispatch(self, action):
+        self._increase_version()
         if not self._started:
             return
         action['version'] = self._version

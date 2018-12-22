@@ -43,9 +43,9 @@ class Grid(object):
 
     def update(self, i):
         self.table1.append([i, i ** 2, i ** 3])
-        self.card.set('{} Time: {}'.format(i, time.time()))
-        self.t1.set('4 Text: {}'.format(i * 3))
-        self.t2.set('4 Text {}'.format(i * 4))
+        self.card.text = '{} Time: {}'.format(i, time.time())
+        self.t1.text = '4 Text: {}'.format(i * 3)
+        self.t2.text = '4 Text {}'.format(i * 4)
 
 
 class Tab2(object):

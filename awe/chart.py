@@ -121,7 +121,7 @@ class Chart(Element):
 
     transformer = None
 
-    def init(self, data, options, transform, moving_window):
+    def _init(self, data, options, transform, moving_window):
         self.transformer = self._get_transformer(transform)
         self.update_data({
             'data': self.transformer.transform(data),

@@ -6,13 +6,13 @@ import bottle
 
 class WebServer(object):
 
-    def __init__(self, page, port):
+    def __init__(self, get_initial_state, port):
         self._port = port
-        self._page = page
+        self._get_initial_state = get_initial_state
         self._content_root = os.path.join(os.path.dirname(__file__), 'resources', 'client', 'awe', 'build')
         self._app = bottle.Bottle()
         self._app.route('/')(self._index)
-        self._app.route('/initial-state')(self._page.get_initial_state)
+        self._app.route('/initial-state')(self._get_initial_state)
         self._app.route('/static/<path:path>')(self._get_static_file)
         self._thread = threading.Thread(target=self.run)
         self._thread.daemon = True
