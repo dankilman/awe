@@ -1,15 +1,21 @@
 from os import path
 from os.path import dirname
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Template
+
+
+basedir = path.join(dirname(dirname(__file__)))
+
+
+def load_example(name):
+    with open(path.join(basedir, 'examples', '{}.py'.format(name))) as f:
+        return f.read()
 
 
 def main():
-    basedir = path.join(dirname(dirname(__file__)))
-    loader = FileSystemLoader(basedir)
-    env = Environment(loader=loader)
-    load_example = lambda name: loader.get_source(env, 'examples/{}.py'.format(name))[0]
-    template = env.get_template('README.jinja.md')
+    with open(path.join(basedir, 'README.jinja.md')) as f:
+        template_content = f.read()
+    template = Template(template_content)
     with open(path.join(basedir, 'README.md'), 'w') as f:
         f.write(template.render(load=load_example))
 
