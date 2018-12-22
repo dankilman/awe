@@ -7,4 +7,7 @@ dev-client:
 build-package:
 	python setup.py bdist_wheel
 
-build: build-client build-package
+update-readme:
+	python tools/generate_readme.py
+
+build: build-client build-package update-readme
