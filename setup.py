@@ -13,8 +13,7 @@ setup(
         'bottle',
         'autobahn[twisted]',
         'twisted',
-        'pydash',
-        'typing'
+        'pydash'
     ],
     include_package_data=True,
     zip_safe=False,
