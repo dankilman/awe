@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='awe',
-    version='0.5',
+    version='0.6',
     description='Dynamic web based reports/dashboards in python',
     long_description='',
     license='MIT License',
