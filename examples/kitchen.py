@@ -63,13 +63,13 @@ def main():
     page = Page()
     kitchen = Kitchen(page)
     page.start()
-    for i in range(1000):
-        print i
-        kitchen.update(i)
-        try:
+    try:
+        for i in range(1000):
+            print i
+            kitchen.update(i)
             time.sleep(5)
-        except KeyboardInterrupt:
-            pass
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':
