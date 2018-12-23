@@ -52,3 +52,4 @@ Which produces this exciting output:
 {{ example('kitchen') }}
 {{ example('page_properties', 'png') }}
 {{ example('standard_output') }}
+{{ example('collapse', 'png') }}

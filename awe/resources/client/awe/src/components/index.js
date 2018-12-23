@@ -4,6 +4,7 @@ import Divider from 'antd/lib/divider';
 import Tabs from 'antd/lib/tabs';
 import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
+import Collapse from 'antd/lib/collapse';
 import Table from './Table';
 import Grid from './Grid';
 import Text from './Text'
@@ -48,6 +49,18 @@ const connectedComponents = {
     <Divider
       {...divider.props}
     />
+  ),
+  Collapse: collapse => (
+    <Collapse
+      {...collapse.props}>
+      {collapse.children}
+    </Collapse>
+  ),
+  Panel: panel => (
+    <Collapse.Panel
+      {...panel.props}>
+      {panel.children}
+    </Collapse.Panel>
   ),
   Tab: tab => (
     <Tabs.TabPane

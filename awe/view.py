@@ -8,6 +8,8 @@ from . import variables
 
 class Element(object):
 
+    allow_children = True
+
     def __init__(self, parent, element_id, props, style):
         self.id = element_id or str(id(self))
         self.element_type = type(self).__name__
@@ -43,6 +45,7 @@ class Element(object):
         }
 
     def _new_child(self, cls, **kwargs):
+        assert self.allow_children
         self._increase_version()
         props = kwargs.pop('props', None)
         style = kwargs.pop('style', None)
@@ -116,9 +119,6 @@ class Element(object):
     def new_tabs(self, **kwargs):
         return self._new_child(Tabs, **kwargs)
 
-    def new_tab(self, name, **kwargs):
-        return self._new_child(Tab, name=name, **kwargs)
-
     def new_table(self, headers, page_size=None, **kwargs):
         return self._new_child(Table, headers=headers, page_size=page_size, **kwargs)
 
@@ -136,6 +136,9 @@ class Element(object):
 
     def new_divider(self, **kwargs):
         return self._new_child(Divider, **kwargs)
+
+    def new_collapse(self, **kwargs):
+        return self._new_child(Collapse, **kwargs)
 
     def new_chart(self, data=None, options=None, transform=None, moving_window=None, **kwargs):
         from .chart import Chart
@@ -163,10 +166,35 @@ class Grid(Element):
 
 
 class Divider(Element):
-    pass
+    allow_children = False
+
+
+class Collapse(Element):
+
+    def _init(self):
+        self.update_props({'defaultActiveKey': []})
+
+    def _new_child(self, cls, **kwargs):
+        assert issubclass(cls, Panel)
+        return super(Collapse, self)._new_child(cls, **kwargs)
+
+    def new_panel(self, header, active=False, **kwargs):
+        result = self._new_child(Panel, header=header, **kwargs)
+        if active:
+            self.props['defaultActiveKey'].append(result.id)
+            self.update_props(self.props)
+        return result
+
+
+class Panel(Element):
+
+    def _init(self, header):
+        self.update_props({'header': header}, override=False)
 
 
 class Text(Element):
+
+    allow_children = False
 
     def _init(self, text):
         self.text = text
@@ -181,10 +209,12 @@ class Text(Element):
 
 
 class Card(Text):
-    pass
+    allow_children = True
 
 
 class Table(Element):
+
+    allow_children = False
 
     def _init(self, headers, page_size):
         if isinstance(headers, dict):
@@ -236,6 +266,8 @@ class Table(Element):
 
 class Button(Element):
 
+    allow_children = False
+
     def _init(self, function, text):
         self._register(function, self.id)
         self.update_data({'text': text or function.__name__})
@@ -251,6 +283,8 @@ class Button(Element):
 
 class Input(Element):
 
+    allow_children = False
+
     def _init(self, placeholder, on_enter):
         self._new_variable('', self.id)
         if placeholder:
@@ -264,6 +298,13 @@ class Tabs(Element):
 
     def _init(self):
         self.update_props({'size': 'small', 'animated': False}, override=False)
+
+    def _new_child(self, cls, **kwargs):
+        assert issubclass(cls, Tab)
+        return super(Tabs, self)._new_child(cls, **kwargs)
+
+    def new_tab(self, name, **kwargs):
+        return self._new_child(Tab, name=name, **kwargs)
 
 
 class Tab(Element):

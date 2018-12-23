@@ -119,6 +119,7 @@ transformers = {t.key: t for t in [
 
 class Chart(Element):
 
+    allow_children = False
     transformer = None
 
     def _init(self, data, options, transform, moving_window):
