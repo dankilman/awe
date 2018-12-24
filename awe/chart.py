@@ -13,12 +13,23 @@ class Transformer(object):
         transformed_added_data = self.transform(added_data)
         for config in transformed_added_data.values():
             added_series = config['series']
-            existing_series = existing_data[config['title']]['series']
+            existing_series = existing_data.setdefault(config['title'], {
+                'title': config['title'],
+                'type': config['type'],
+                'series': []
+            })['series']
+            existing_series_set = set()
             new_series_dict = {}
-            for series in added_series:
-                new_series_dict[series['name']] = series['data']
             for series in existing_series:
-                series['data'].extend(new_series_dict[series['name']])
+                existing_series_set.add(series['name'])
+            for series in added_series:
+                if series['name'] in existing_series_set:
+                    new_series_dict[series['name']] = series['data']
+                else:
+                    existing_series.append(series)
+            for series in existing_series:
+                if series['name'] in new_series_dict:
+                    series['data'].extend(new_series_dict[series['name']])
         return transformed_added_data
 
     def transform(self, data):
@@ -50,6 +61,40 @@ class NumberSequenceTransformer(Transformer):
                 'type': 'line'
             }
         }
+
+
+class FlatDictTransformer(Transformer):
+
+    key = 'flat'
+
+    def __init__(self, chart_mapping, series_mapping, value_key):
+        self._chart_mapping = chart_mapping
+        self._series_mapping = series_mapping
+        self._value_key = value_key
+
+    def transform(self, data):
+        data = data or []
+        now = now_ms()
+        result = {}
+        chart_dict = {}
+        for item in data:
+            chart_key = ' '.join(item[k] for k in self._chart_mapping)
+            series_key = ' '.join(item[k] for k in self._series_mapping)
+            value = item[self._value_key]
+            current_chart = chart_dict.setdefault(chart_key, {})
+            series_data = current_chart.setdefault(series_key, [])
+            series_data.append((now, value))
+        for chart_key, series in chart_dict.items():
+            for series_key, series_data in series.items():
+                (result.setdefault(chart_key, {
+                    'series': [],
+                    'title': chart_key,
+                    'type': 'line'
+                })['series'].append({
+                    'name': series_key,
+                    'data': series_data
+                }))
+        return result
 
 
 class DictLevelsTransformer(Transformer):
@@ -113,7 +158,11 @@ class DictLevelsTransformer(Transformer):
 
 transformers = {t.key: t for t in [
     NoOpTransformer(),
-    NumberSequenceTransformer()
+    NumberSequenceTransformer(),
+]}
+
+transformer_classes = {t.key: t for t in [
+    FlatDictTransformer
 ]}
 
 
@@ -143,6 +192,9 @@ class Chart(Element):
         transformer = transform or 'noop'
         if isinstance(transformer, Transformer):
             return transformer
+        elif isinstance(transformer, dict):
+            transformer_key = transformer.pop('type')
+            return transformer_classes[transformer_key](**transformer)
         if isinstance(transformer, basestring):
             if transformer in transformers:
                 return transformers[transformer]

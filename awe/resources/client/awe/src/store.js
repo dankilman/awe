@@ -8,18 +8,38 @@ function addChartData(data) {
     return existingData.withMutations(map => {
       for (const config of data.values()) {
         const title = config.get('title');
-        const newSeriesObject = {};
-        for (const singleSeries of config.get('series').values()) {
-          newSeriesObject[singleSeries.get('name')] = singleSeries.get('data');
-        }
         const seriesPath = [title, 'series'];
+        if (!map.has(title)) {
+          map = map.set(title, fromJS({
+            title,
+            type: config.get('type'),
+            series: [],
+          }))
+        }
         let existingSeries = map.getIn(seriesPath);
+        const newSeriesObject = {};
+        const existingSeriesObject = {};
+        for (const singleSeries of existingSeries.values()) {
+          existingSeriesObject[singleSeries.get('name')] = true;
+        }
+        for (const singleSeries of config.get('series').values()) {
+          if (existingSeriesObject[singleSeries.get('name')]) {
+            newSeriesObject[singleSeries.get('name')] = singleSeries.get('data');
+          }
+        }
         for (const [index, singleSeries] of existingSeries.entries()) {
-          const existingData = singleSeries.get('data');
-          const newData = newSeriesObject[singleSeries.get('name')];
-          const newExistingData = existingData.concat(newData);
-          existingSeries = existingSeries.set(index, singleSeries.set('data', newExistingData));
-          map = map.setIn(seriesPath, existingSeries);
+          if (newSeriesObject[singleSeries.get('name')]) {
+            const existingData = singleSeries.get('data');
+            const newData = newSeriesObject[singleSeries.get('name')];
+            const newExistingData = existingData.concat(newData);
+            existingSeries = existingSeries.set(index, singleSeries.set('data', newExistingData));
+            map = map.setIn(seriesPath, existingSeries);
+          }
+        }
+        for (const singleSeries of config.get('series').values()) {
+          if (!existingSeriesObject[singleSeries.get('name')]) {
+            map = map.updateIn(seriesPath, list => list.push(fromJS(singleSeries)))
+          }
         }
       }
       return map;

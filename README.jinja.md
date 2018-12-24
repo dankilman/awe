@@ -41,3 +41,4 @@ pip install awe
 {{ example('page_properties', 'png') }}
 {{ example('standard_output') }}
 {{ example('collapse', 'png') }}
+{{ example('chart_flat') }}
