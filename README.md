@@ -28,7 +28,7 @@ pip install awe
 
 ## Getting Started
 
-The basic idea in `awe` is the you create an `awe.Page()` instance in the beginning of your script. e.g:
+The basic idea in `awe` is that you create an `awe.Page()` instance in the beginning of your script. e.g:
 
 ```python
 from awe import Page
@@ -64,7 +64,7 @@ button = card.new_button(lambda: None)
 
 The above creates a card as a child element of `page` and `text` and `button` elements as children of `card`.
 
-One you are done with the initial page setup, call `page.start()`
+Once you're done with the initial page setup, call `page.start()`. e.g:
 
 ```python
 # The default call will will open a browser page without blocking the script
