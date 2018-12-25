@@ -1,6 +1,6 @@
 # Credits
 
-The following open source projects are used to make awe. Thank you, open source projects.
+The following open source projects are used by `awe`. Thank you, open source projects.
 Your contributions to this world are greatly appreciated.
 
 - [bottle (MIT)](https://github.com/bottlepy/bottle)
