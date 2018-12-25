@@ -84,6 +84,8 @@ The following examples can be used as reference for the different elements that 
 
 
 ### [`hello_world.py`](examples/hello_world.py)
+The most basic page with a single text element.
+
 ```python
 from awe import Page
 
@@ -95,6 +97,13 @@ page.start(block=True)
 ![image](docs/images/hello_world.png)
 
 ### [`button_and_input.py`](examples/button_and_input.py)
+A page with a button and two inputs.
+
+Clicking the button or hitting enter when the second input is focused, runs `do_stuff`
+which gets a reference to the input values and the button element using the `@inject` decorator.
+
+`do_stuff` in turn, updates the button text.
+
 ```python
 from awe import Page, inject
 
@@ -126,6 +135,13 @@ if __name__ == '__main__':
 ![image](docs/images/button_and_input.gif)
 
 ### [`chart_simple.py`](examples/chart_simple.py)
+A page with a single chart.
+
+The chart is initialized with a single data item and then updated every 1 second with a new data item.
+
+The data added to the chart is transformed by the `numbers` transformer. It builds a single chart with series
+built from each value in the data item (which is a list of numbers)
+
 ```python
 import time
 from random import randint
@@ -161,6 +177,18 @@ if __name__ == '__main__':
 ![image](docs/images/chart_simple.gif)
 
 ### [`chart_complex.py`](examples/chart_complex.py)
+A page with a single chart.
+
+The chart is initialized with a single data item and then updated every 5 seconds.
+
+The chart has a moving time window of 3 minutes.
+
+The data added to the chart is transformed by the `2to31` transformer. It builds charts from the different keys
+of the 2nd level in the nested dictionary data items. It builds the chart series from the different combinations
+of the 3rd and 1st levels in the nested dictionary data items.
+
+In general, every `[Ns...]to[Ms...]` transformer is supported.
+
 ```python
 import time
 from random import randint
@@ -192,6 +220,22 @@ if __name__ == '__main__':
 ![image](docs/images/chart_complex.gif)
 
 ### [`kitchen.py`](examples/kitchen.py)
+A page that showcases many different element types supported by `awe`.
+
+The following element types are used:
+
+- tabs
+- grids
+- dividers
+- cards
+- texts
+- tables
+
+Element data is updated using API exposed by each element type.
+
+In addition, the `divider` element is updated using the lower level `element.update_prop()` method which updates
+the underlying props of the react component.
+
 ```python
 import time
 
@@ -274,6 +318,8 @@ if __name__ == '__main__':
 ![image](docs/images/kitchen.gif)
 
 ### [`page_properties.py`](examples/page_properties.py)
+A page that demonstrates how to set the page title, width and override its style.
+
 ```python
 from awe import Page
 
@@ -293,6 +339,10 @@ if __name__ == '__main__':
 ![image](docs/images/page_properties.png)
 
 ### [`standard_output.py`](examples/standard_output.py)
+A page that demonstrates adding text dynamically to a page after it has been started.
+
+The elements are created with a custom style.
+ 
 ```python
 import time
 
@@ -316,6 +366,10 @@ if __name__ == '__main__':
 ![image](docs/images/standard_output.gif)
 
 ### [`collapse.py`](examples/collapse.py)
+A page with a single collapse element. 
+
+The collapse has 3 panels. The first panel defaults to being expanded. The other two panels default to collapsed.
+
 ```python
 from awe import Page
 
@@ -339,6 +393,16 @@ if __name__ == '__main__':
 ![image](docs/images/collapse.png)
 
 ### [`chart_flat.py`](examples/chart_flat.py)
+A page with a single chart.
+
+The chart is initialized with a single data item and then updated every 0.7 seconds with a new data item.
+
+The chart has a moving time window of 3 minutes.
+
+The data added to the chart is transformed by the `flat` transformer. It builds charts from the different combinations
+of the `chart_mapping` list. It builds the chart series from the different combinations
+of the `series_mapping` list. The values are extracted from the `value_key` key.
+
 ```python
 import time
 import random
@@ -365,7 +429,7 @@ def main():
         'series_mapping': ['temp', 'city'],
         'value_key': 'value'
     }, moving_window=3 * 60)
-    page.start(develop=True)
+    page.start()
     while True:
         time.sleep(0.7)
         chart.add(generate_random_data())

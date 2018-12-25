@@ -83,6 +83,7 @@ The following examples can be used as reference for the different elements that 
 
 {% macro example(name, extension='gif') -%}
 ### [`{{name}}.py`](examples/{{name}}.py)
+{{ docstring(name) }}
 ```python
 {{ load(name) }}
  ```

@@ -23,7 +23,7 @@ def main():
         'series_mapping': ['temp', 'city'],
         'value_key': 'value'
     }, moving_window=3 * 60)
-    page.start(develop=True)
+    page.start()
     while True:
         time.sleep(0.7)
         chart.add(generate_random_data())
