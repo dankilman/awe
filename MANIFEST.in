@@ -1,1 +1,2 @@
 recursive-include awe/resources/client/awe/build *
+recursive-exclude awe/resources/client/awe/build *.map

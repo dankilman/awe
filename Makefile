@@ -1,3 +1,6 @@
+clean:
+	rm -rf build
+
 build-client:
 	cd awe/resources/client/awe && npm run build
 
@@ -10,4 +13,4 @@ build-package:
 update-readme:
 	python tools/generate_readme.py
 
-build: build-client build-package update-readme
+build: clean build-client build-package update-readme

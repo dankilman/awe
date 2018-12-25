@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='awe',
-    version='0.9.0',
+    version='0.9.1',
     description='Dynamic web based reports/dashboards in python',
     url='https://github.com/dankilman/awe',
     long_description='',
