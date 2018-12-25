@@ -21,6 +21,12 @@ Dynamic web based reports/dashboards in python.
 
 Under the hood, `awe` generates the page using react.
 
+## Why is it named `awe`?
+
+I like short names. I initially called this package `pages` but then discovered it is already taken in `pypi`.
+Finding a decent unused name is not an easy task!
+
+
 ## Installation
 ```bash
 pip install awe
