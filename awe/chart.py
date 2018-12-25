@@ -37,6 +37,12 @@ class Transformer(object):
 
 
 class NoOpTransformer(Transformer):
+    """
+    The default transformer. Assumes data is already in appropriate highcharts format.
+
+    key: noop
+    """
+
     key = 'noop'
 
     def transform(self, data):
@@ -44,6 +50,13 @@ class NoOpTransformer(Transformer):
 
 
 class NumberSequenceTransformer(Transformer):
+    """
+    A numbers transformer. Assumes each item in data if a single number or a list of numbers.
+    If a list of numbers is supplied, each number in the list is assumed to belong to a different series.
+
+    key: numbers
+    """
+
     key = 'numbers'
 
     def transform(self, data):
@@ -68,6 +81,15 @@ class FlatDictTransformer(Transformer):
     key = 'flat'
 
     def __init__(self, chart_mapping, series_mapping, value_key):
+        """
+        A transformer that expects data items to be dictionaries.
+
+        key: flat
+
+        :param chart_mapping: A list of keys to build charts from (combinations of them)
+        :param series_mapping: A list of keys to build chart series from (combinations of them)
+        :param value_key: The key to the value of the data item
+        """
         self._chart_mapping = chart_mapping
         self._series_mapping = series_mapping
         self._value_key = value_key
@@ -100,6 +122,13 @@ class FlatDictTransformer(Transformer):
 class DictLevelsTransformer(Transformer):
 
     def __init__(self, chart_mapping, series_mapping):
+        """
+        A transformer that handles nested dictionaries data items. Usually instantiated by supplying a transform
+        key in this format: <chart levels>to<series levels>. for example, a key of `23to1' assumes a "3 level" nested
+        dictionary where the charts will be generated from the different combinations of keys in the 2nd and 3rd levels
+        and the series for each chart will be generated from each key in the 1st level.
+        """
+
         self._chart_mapping = chart_mapping
         self._series_mapping = series_mapping
 
@@ -180,6 +209,11 @@ class Chart(Element):
         })
 
     def add(self, data):
+        """
+        Add new data to a chart after it has been created.
+
+        :param data: A list of data items
+        """
         transformed_data = self.transformer.add(self.data['data'], data)
         self.update_element(
             path=['data', 'data'],

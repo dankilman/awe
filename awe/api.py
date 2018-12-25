@@ -24,6 +24,13 @@ class Page(view.Element):
         self._version = 0
 
     def start(self, block=False, open_browser=True, develop=False):
+        """
+        Start the page services
+
+        :param block: Should the method invocation block (default: False)
+        :param open_browser: Should a new tab be opened in a browser pointing to the started page (default: True)
+        :param develop: During development, changes to port for open browser to 3000 (due to npm start, default False)
+        """
         self._message_handler.start()
         self._server.start()
         self._ws_server.start()
@@ -70,6 +77,9 @@ class Page(view.Element):
 
     @staticmethod
     def block():
+        """
+        Utility method to block after page has been started
+        """
         try:
             while True:
                 time.sleep(1)
