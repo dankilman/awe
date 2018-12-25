@@ -1,7 +1,7 @@
 from collections import deque
 
 import pydash
-from typing import List
+from typing import List  # noqa
 
 from . import variables
 

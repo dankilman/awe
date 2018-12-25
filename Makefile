@@ -13,4 +13,12 @@ build-package:
 update-readme:
 	python tools/generate_readme.py
 
+flake8:
+	flake8 awe
+
+pytest:
+	pytest tests
+
 build: clean build-client build-package update-readme
+
+test: flake8 pytest

@@ -3,19 +3,34 @@ version: 2
 jobs:
   build:
     docker:
-    - image: circleci/python:2.7.15-jessie-node-browsers
+    - image: circleci/python:2.7-jessie-node-browsers
     steps:
     - checkout
     - run:
+        name: npm install
         command: cd awe/resources/client/awe && npm install
     - run:
-        command: virtualenv env
+        command: virtualenv build-env
     - run:
-        command: source env/bin/activate && pip install -e .
+        name: install package in build env
+        command: source build-env/bin/activate && pip install -e .
     - run:
-        command: source env/bin/activate && pip install Jinja2
+        name: install build requirements
+        command: source build-env/bin/activate && pip install -r build-requirements.txt
     - run:
-        command: source env/bin/activate && make build
+        name: make build
+        command: source build-env/bin/activate && make build
+    - run:
+        command: virtualenv test-env
+    - run:
+        name: pip install dist
+        command: source test-env/bin/activate && pip install dist/*
+    - run:
+        name: install test requirements
+        command: source test-env/bin/activate && pip install -r test-requirements.txt
+    - run:
+        name: make test
+        command: source test-env/bin/activate && make test
 
 workflows:
   version: 2

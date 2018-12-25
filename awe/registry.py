@@ -18,7 +18,7 @@ class Registry(object):
         elif callable(obj):
             self.functions[obj_id] = obj
         else:
-            raise RuntimeError("No registry is defined for objects of type".format(type(obj).__name__))
+            raise RuntimeError('No registry is defined for objects of type'.format(type(obj).__name__))
 
     def get_variables(self):
         return {k: var.get_variable() for k, var in self.variables.items()}
