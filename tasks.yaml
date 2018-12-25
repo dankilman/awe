@@ -7,6 +7,5 @@
     - themes
 - release:
   - tests
-  - circle ci integration
   - code comments
   - dev docs

@@ -31,6 +31,9 @@ jobs:
     - run:
         name: make test
         command: source test-env/bin/activate && make test
+    - run:
+        name: check isolated dist package
+        command: source test-env/bin/activate && cd test-env && python -c 'import awe; awe.Page()'
 
 workflows:
   version: 2
