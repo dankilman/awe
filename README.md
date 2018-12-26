@@ -73,7 +73,7 @@ The above creates a card as a child element of `page` and `text` and `button` el
 Once you're done with the initial page setup, call `page.start()`. e.g:
 
 ```python
-# The default call will will open a browser page without blocking the script
+# The default call will open a browser page without blocking the script
 page.start()
 
 # This will block the script

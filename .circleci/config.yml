@@ -21,6 +21,9 @@ jobs:
         name: make build
         command: source build-env/bin/activate && make build
     - run:
+        name: verify generated README.md is up to date
+        command: diff README.md <(git show HEAD:README.md)
+    - run:
         command: virtualenv test-env
     - run:
         name: pip install dist
