@@ -22,3 +22,6 @@ pytest:
 build: clean build-client build-package update-readme
 
 test: flake8 pytest
+
+publish:
+	tools/publish.sh
