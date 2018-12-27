@@ -25,3 +25,9 @@ test: flake8 pytest
 
 publish:
 	tools/publish.sh
+
+bump-patch-version:
+	python tools/bump_version.py patch
+
+bump-minor-version:
+	python tools/bump_version.py minor
