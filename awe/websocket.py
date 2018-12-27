@@ -10,14 +10,16 @@ from autobahn.twisted import websocket
 class Connection(websocket.WebSocketServerProtocol):
 
     def on_open(self):
-        self.factory.open_connections[id(self)] = self
+        client_id = str(id(self))
+        self.factory.open_connections[client_id] = self
+        self.dispatch({'type': 'setClientId', 'clientId': client_id})
 
     def on_message(self, payload, _):
         message = json.loads(payload)
         self.factory.message_handler.handle(message)
 
     def on_close(self, *_):
-        self.factory.open_connections.pop(id(self))
+        self.factory.open_connections.pop(str(id(self)))
 
     def dispatch(self, action):
         self.sendMessage(json.dumps(action))
@@ -46,9 +48,10 @@ class WebSocketServer(websocket.WebSocketServerFactory):
         twisted.internet.reactor.listenTCP(self.config['port'], self)
         twisted.internet.reactor.run(installSignalHandlers=False)
 
-    def dispatch(self, action):
-        for connection in self.open_connections.values():
+    def dispatch(self, action, client_id=None):
+        connections = [self.open_connections[client_id]] if client_id else self.open_connections.values()
+        for connection in connections:
             connection.dispatch(action)
 
-    def dispatch_from_thread(self, action):
-        twisted.internet.reactor.callFromThread(self.dispatch, action)
+    def dispatch_from_thread(self, action, client_id):
+        twisted.internet.reactor.callFromThread(self.dispatch, action, client_id)

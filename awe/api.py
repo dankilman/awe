@@ -56,12 +56,12 @@ class Page(view.Element):
     def _register(self, obj, obj_id=None):
         self._registry.register(obj, obj_id)
 
-    def _dispatch(self, action):
+    def _dispatch(self, action, client_id=None):
         self._increase_version()
         if not self._started:
             return
         action['version'] = self._version
-        self._ws_server.dispatch_from_thread(action)
+        self._ws_server.dispatch_from_thread(action, client_id)
 
     @staticmethod
     def _set_default_style(style, width):

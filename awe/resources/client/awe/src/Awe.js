@@ -4,6 +4,7 @@ class Awe {
   constructor({processor, host, port}) {
     this.processor = processor;
     this.finishedInitialFetch = false;
+    this.clientId = null;
     this.pendingActions = [];
     this.ws = new WebSocket(`ws://${host}:${port}`);
     this.ws.onmessage = this.onMessage.bind(this);
@@ -40,11 +41,11 @@ class Awe {
   }
 
   call(functionId, kwargs) {
-    this.sendMessage({type: 'call', functionId, kwargs})
+    this.sendMessage({type: 'call', functionId, kwargs, clientId: this.clientId})
   }
 
   updateVariable(variableId, value) {
-    this.sendMessage({type: 'updateVariable', variableId, value})
+    this.sendMessage({type: 'updateVariable', variableId, value, clientId: this.clientId})
   }
 
   sendMessage(message) {
@@ -53,7 +54,9 @@ class Awe {
 
   onMessage(message) {
     const action = JSON.parse(message.data);
-    if (!this.finishedInitialFetch) {
+    if (action.type === 'setClientId') {
+      this.clientId = action.clientId;
+    } else if (!this.finishedInitialFetch) {
       this.pendingActions.push(action);
     } else {
       this.processor.dispatch(action);

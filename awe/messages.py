@@ -28,6 +28,10 @@ class MessageHandler(object):
             self.handlers[message_type](message)
         except Exception:
             traceback.print_exc()
+            self.dispatch({
+                'type': 'displayError',
+                'error': traceback.format_exc()
+            }, client_id=message['clientId'])
 
     def handle_call(self, message):
         function = self.registry.functions[message['functionId']]

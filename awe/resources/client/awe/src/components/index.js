@@ -4,7 +4,9 @@ import Divider from 'antd/lib/divider';
 import Tabs from 'antd/lib/tabs';
 import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
+import Icon from 'antd/lib/icon';
 import Collapse from 'antd/lib/collapse';
+import Modal from 'antd/lib/modal';
 import Table from './Table';
 import Grid from './Grid';
 import Text from './Text'
@@ -94,7 +96,22 @@ const connectedComponents = {
       {...chart.props}
       chart={chart}
     />
-  )
+  ),
+  _Error: error => (
+    <Modal
+      key="error"
+      onCancel={error.hideError}
+      visible={true}
+      title={
+        <div>
+          <Icon type="exclamation-circle" style={{paddingRight: 10, color: 'red'}}/>
+          <span>Error</span>
+        </div>
+      }
+      footer={null}>
+      <pre><code>{error.displayError}</code></pre>
+    </Modal>
+  ),
 };
 
 const components = Object.assign({}, nativeComponents, connectedComponents);
