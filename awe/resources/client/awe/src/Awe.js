@@ -24,10 +24,11 @@ class Awe {
 
   static start({processor, host = '127.0.0.1', port = 9000, initialState}) {
     if (initialState) {
-      const notSupported = 'This is not supported in offline mode';
+      const notSupported = () => console.warn('This is not supported in offline mode');
       instance = {
-        call: () => console.warn(notSupported),
-        updateVariable: () => console.warn(notSupported)
+        call: notSupported,
+        updateVariable: notSupported,
+        fetchExport: notSupported
       };
       setTimeout(() => processor.processInitialState(initialState), 0);
     } else {
@@ -38,6 +39,10 @@ class Awe {
 
   static async fetchInitialState() {
     return await (await fetch('/initial-state')).json();
+  }
+
+  async fetchExport() {
+    return await fetch('/export');
   }
 
   call(functionId, kwargs) {

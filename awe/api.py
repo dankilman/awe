@@ -7,18 +7,28 @@ from . import registry
 from . import view
 from . import webserver
 from . import websocket
+from . import export
 
 
 class Page(view.Element):
 
-    def __init__(self, title='Awe', port=8080, ws_port=9000, width=None, style=None):
+    def __init__(
+            self,
+            title='Awe',
+            port=8080,
+            ws_port=9000,
+            width=None,
+            style=None,
+            export_fn=None):
         super(Page, self).__init__(parent=None, element_id='', props=None, style=None)
         self._port = port
         self._title = title
         self._style = self._set_default_style(style, width)
         self._registry = registry.Registry()
         self._message_handler = messages.MessageHandler(self._registry, self._dispatch)
-        self._server = webserver.WebServer(self._get_initial_state, port=port)
+        self._server = webserver.WebServer(get_initial_state=self._get_initial_state,
+                                           exporter=export.Exporter(export_fn),
+                                           port=port)
         self._ws_server = websocket.WebSocketServer(self._message_handler, port=ws_port)
         self._started = False
         self._version = 0

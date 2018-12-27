@@ -83,7 +83,61 @@ page.start(block=True)
 page.start(open_browser=False)
 ```
 
-The following examples can be used as reference for the different elements that can be created with `awe`.
+The [examples](#examples) section can be used as reference for the different elements that can be created with `awe`.
+
+## Export To Static HTML
+
+At any point during the lifetime of a page you can export its current state to a standalone `html` file you can
+freely share.
+
+You can export in any of the following ways:
+- Open the options by clicking the options button at the top right and then click **Export**.
+- Open the options by holding `Shift` and typing `A A A` (three consecutive A's) and then click **Export**.
+- Hold `Shift` and type `A A E` (two A's then E).
+
+Note that for the keyboard shortcuts to work, the focus should be on some page content.
+
+### Export function
+
+By default, when you export a page, the result is simply downloaded as a static file.
+
+You can override this default behavior by passing an `export_fn` argument when creating the `Page` instance. e.g:
+
+```python
+import time
+
+from awe import Page
+
+from utils import save_to_s3  # example import, not something awe comes bundled with
+
+
+def custom_export_fn(index_html):
+    # index_html is the static html content as a string.
+    # You can, for example, save the content to S3. 
+    save_to_s3(
+        bucket='my_bucket', 
+        key='page-{}.html'.format(time.time()), 
+        content=index_html
+    )
+    
+    # Returning a dict from the export_fn function tells awe to skip the default download behavior.
+    # Returning anything else is expected to be a string that will be downloaded in the browser.
+    # This can be the unmodified index_html, a modified one, a json with statistics, etc...
+    # Note that awe currently doesn't do anything with the resulting dict if one is returned except 
+    # for deciding whether to download the result or not. This is likely to change in the future.
+    return {'status': 'success'}
+
+
+def main():
+    page = Page(export_fn=custom_export_fn)
+    page.new_text('Hello')
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+```
+
 
 ## Examples
 

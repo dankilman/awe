@@ -1,7 +1,14 @@
 import {fromJS} from 'immutable';
 import {createStore} from 'redux';
 
-const initialState = fromJS({elements: {}, variables: {}, style: {}, displayError: null});
+const initialState = fromJS({
+  elements: {},
+  variables: {},
+  style: {},
+  displayError: false,
+  displayOptions: false,
+  exportLoading: false,
+});
 
 function addChartData(data) {
   return (existingData) => {
@@ -55,7 +62,7 @@ const updateElementActions = {
 };
 
 function setStyle(state, {style}) {
-  return state.set('style', style);
+  return state.set('style', fromJS(style));
 }
 
 function newElement(state, {id, index, data, parentId, elementType, props = {}}) {
@@ -95,8 +102,12 @@ function displayError(state, {error}) {
   return state.set('displayError', error);
 }
 
-function hideError(state) {
-  return state.set('displayError', null);
+function displayOptions(state, {displayOptions}) {
+  return state.set('displayOptions', displayOptions);
+}
+
+function exportLoading(state, {exportLoading}) {
+  return state.set('exportLoading', exportLoading);
 }
 
 const reducers = {
@@ -106,7 +117,8 @@ const reducers = {
   updateElement: updatePath('elements'),
   updateVariable,
   displayError,
-  hideError,
+  displayOptions,
+  exportLoading,
 };
 
 function reducer(state = initialState, action) {
