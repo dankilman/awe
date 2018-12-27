@@ -21,8 +21,17 @@ class Awe {
     });
   }
 
-  static start({processor, host = '127.0.0.1', port = 9000}) {
-    instance = new Awe({processor, host, port});
+  static start({processor, host = '127.0.0.1', port = 9000, initialState}) {
+    if (initialState) {
+      const notSupported = 'This is not supported in offline mode';
+      instance = {
+        call: () => console.warn(notSupported),
+        updateVariable: () => console.warn(notSupported)
+      };
+      setTimeout(() => processor.processInitialState(initialState), 0);
+    } else {
+      instance = new Awe({processor, host, port});
+    }
     return instance;
   }
 

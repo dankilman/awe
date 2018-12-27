@@ -6,7 +6,11 @@ import Awe from './Awe';
 import Processor from './Processor';
 import store from './store';
 
-Awe.start({processor: new Processor(store)});
+Awe.start({
+  processor: new Processor(store),
+  initialState: window.frozenState
+});
+
 ReactDOM.render(
   <Provider store={store}>
     <App/>
