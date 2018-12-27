@@ -22,8 +22,12 @@ validate()
     test "${current_branch}" = "${master_branch}" || exit_with "Current branch is not ${master_branch}"
     git diff --quiet "${current_branch}" "${origin_master}" || exit_with "local version differs from origin"
     test -f "${dist_file}" || exit_with "no dist found"
-    status="$(curl ${build_status_url} 2> /dev/null | jq '.[].status' -r)"
+    local full_status="$(curl ${build_status_url} 2> /dev/null)"
+    local status="$(echo ${full_status} | jq '.[].status' -r)"
+    local status_commit="$(echo ${full_status} | jq '.[].vcs_revision' -r)"
+    local local_commit="$(git rev-parse HEAD)"
     test "${status}" = 'success' || exit_with "Last ${master_branch} build failed"
+    test "${status_commit}" = "${local_commit}" || exit_with "CircleCI commit sha differs from local commit sha"
 }
 
 tag()
