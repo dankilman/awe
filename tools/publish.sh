@@ -9,14 +9,31 @@ master_branch="master"
 current_branch="$(git symbolic-ref --short HEAD)"
 origin_master="origin/master"
 build_status_url1="https://circleci.com/api/v1.1/project/github/dankilman/awe/tree/${master_branch}?limit=1"
-build_status_url2="https://circleci.com/api/v1.1/project/github/dankilman/awe/tree/${master_branch}?limit=1&offset=1"
+build_status_url2="${build_status_url1}&offset=1"
 static_files_dir="awe/resources/client/awe/build"
 gzipped_static_files_dir="awe/resources/client/awe/build-gzip"
+
+build_found=''
+build37_found=''
 
 exit_with()
 {
     echo "$@"
     exit 1
+}
+
+validate_ci()
+{
+    local local_commit="$(git rev-parse HEAD)"
+    local build_status_url="$1"
+    local full_status="$(curl ${build_status_url} 2> /dev/null)"
+    local status="$(echo ${full_status} | jq '.[].status' -r)"
+    local status_commit="$(echo ${full_status} | jq '.[].vcs_revision' -r)"
+    local job_name="$(echo ${full_status} | jq '.[].workflows.job_name' -r)"
+    test "${status}" = 'success' || exit_with "Last ${master_branch} build failed"
+    test "${job_name}" = 'build' || test "${job_name}" = "build37" || exit_with "Missing build/build37"
+    test "${status_commit}" = "${local_commit}" || exit_with "CircleCI commit sha differs from local commit sha"
+    export ${job_name}_found=true
 }
 
 validate()
@@ -25,22 +42,10 @@ validate()
     test "${current_branch}" = "${master_branch}" || exit_with "Current branch is not ${master_branch}"
     git diff --quiet "${current_branch}" "${origin_master}" || exit_with "local version differs from origin"
     test -f "${dist_file}" || exit_with "no dist found"
-    local full_status1="$(curl ${build_status_url1} 2> /dev/null)"
-    local status1="$(echo ${full_status1} | jq '.[].status' -r)"
-    local status_commit1="$(echo ${full_status1} | jq '.[].vcs_revision' -r)"
-    local job_name1="$(echo ${full_status1} | jq '.[].workflows.job_name' -r)"
-    local full_status2="$(curl ${build_status_url2} 2> /dev/null)"
-    local status2="$(echo ${full_status2} | jq '.[].status' -r)"
-    local status_commit2="$(echo ${full_status2} | jq '.[].vcs_revision' -r)"
-    local job_name2="$(echo ${full_status2} | jq '.[].workflows.job_name' -r)"
-    local local_commit="$(git rev-parse HEAD)"
-    test "${job_name1}" != "${job_name2}" || exit_with "Last two jobs point to the same build type"
-    test "${status1}" = 'success' || exit_with "Last ${master_branch} build failed"
-    test "${status_commit1}" = "${local_commit}" || exit_with "CircleCI commit sha differs from local commit sha"
-    test "${job_name1}" = 'build' || test "${job_name1}" = "build-3.6" || exit_with "Missing build/build-3.6"
-    test "${status2}" = 'success' || exit_with "Last ${master_branch} build failed"
-    test "${status_commit2}" = "${local_commit}" || exit_with "CircleCI commit sha differs from local commit sha"
-    test "${job_name2}" = 'build' || test "${job_name2}" = "build-3.6" || exit_with "Missing build/build-3.6"
+    validate_ci ${build_status_url1}
+    validate_ci ${build_status_url2}
+    test "${build_found}" = 'true' || exit_with "Missing build job"
+    test "${build37_found}" = 'true' || exit_with "Missing build37 job"
 }
 
 tag()
