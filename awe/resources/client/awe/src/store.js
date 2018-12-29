@@ -8,6 +8,7 @@ const initialState = fromJS({
   displayError: false,
   displayOptions: false,
   exportLoading: false,
+  displayExportObjectResult: false,
 });
 
 function addChartData(data) {
@@ -110,6 +111,10 @@ function exportLoading(state, {exportLoading}) {
   return state.set('exportLoading', exportLoading);
 }
 
+function displayExportObjectResult(state, {displayExportObjectResult}) {
+  return state.set('displayExportObjectResult', fromJS(displayExportObjectResult));
+}
+
 const reducers = {
   setStyle,
   newElement,
@@ -119,6 +124,7 @@ const reducers = {
   displayError,
   displayOptions,
   exportLoading,
+  displayExportObjectResult,
 };
 
 function reducer(state = initialState, action) {

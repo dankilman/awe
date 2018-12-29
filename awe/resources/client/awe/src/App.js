@@ -5,6 +5,7 @@ import components from './components';
 import Error from './components/internal/Error'
 import Options, {doExport} from './components/internal/Options'
 import DisplayOptionsButton from './components/internal/DisplayOptionsButton';
+import ExportObjectResult from './components/internal/ExportObjectResult';
 import {instance} from './Awe';
 import actions from './actions';
 import './App.css';
@@ -38,6 +39,7 @@ class App extends Component {
           {processedRoot}
           <Error/>
           <Options/>
+          <ExportObjectResult/>
           <DisplayOptionsButton/>
         </div>
       </HotKeys>

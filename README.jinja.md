@@ -113,19 +113,19 @@ from utils import save_to_s3  # example import, not something awe comes bundled 
 
 def custom_export_fn(index_html):
     # index_html is the static html content as a string.
-    # You can, for example, save the content to S3. 
+    # You can, for example, save the content to S3.
+    key='page-{}.html'.format(time.time()) 
     save_to_s3(
         bucket='my_bucket', 
-        key='page-{}.html'.format(time.time()), 
+        key=key, 
         content=index_html
     )
     
     # Returning a dict from the export_fn function tells awe to skip the default download behavior.
+    # awe will also display a simple key/value table modal built from the dict result.
     # Returning anything else is expected to be a string that will be downloaded in the browser.
     # This can be the unmodified index_html, a modified one, a json with statistics, etc...
-    # Note that awe currently doesn't do anything with the resulting dict if one is returned except 
-    # for deciding whether to download the result or not. This is likely to change in the future.
-    return {'status': 'success'}
+    return {'status': 'success', 'key': key}
 
 
 def main():

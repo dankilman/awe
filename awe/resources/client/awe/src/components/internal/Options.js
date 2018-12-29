@@ -15,6 +15,10 @@ function doExport(dispatch, shouldDisplayOptions) {
     dispatch(actions.hideOptions);
     dispatch(actions.displayError(error))
   };
+  const displayExportObjectResult = (result) => {
+    dispatch(actions.hideOptions);
+    dispatch(actions.displayExportObjectResult(result));
+  };
 
   return async () => {
     if (shouldDisplayOptions) {
@@ -38,7 +42,7 @@ function doExport(dispatch, shouldDisplayOptions) {
         displayError(`Export failed: ${message}`);
       } else {
         if (json) {
-          
+          displayExportObjectResult(json);
         } else {
           download(text, `${document.title}.html`, 'text/html');
         }
