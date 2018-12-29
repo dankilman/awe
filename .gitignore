@@ -16,6 +16,7 @@ outfds
 *.egg-info
 dist
 build
+build-gzip
 eggs
 parts
 bin

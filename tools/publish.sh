@@ -9,6 +9,8 @@ master_branch="master"
 current_branch="$(git symbolic-ref --short HEAD)"
 origin_master="origin/master"
 build_status_url="https://circleci.com/api/v1.1/project/github/dankilman/awe/tree/${master_branch}?limit=1"
+static_files_dir="awe/resources/client/awe/build"
+gzipped_static_files_dir="awe/resources/client/awe/build-gzip"
 
 exit_with()
 {
@@ -43,13 +45,24 @@ publish_pypi()
     twine upload "${dist_file}"
 }
 
+gzip_static_files()
+{
+    echo "Gzipping static files"
+    rm -r ${gzipped_static_files_dir} || true
+    cp -R ${static_files_dir} ${gzipped_static_files_dir}
+    find ${gzipped_static_files_dir} -type f ! -name '*.gz' \
+        -exec gzip -9 "{}" \; \
+        -exec mv "{}.gz" "{}" \;
+}
+
 publish_static_files()
 {
     echo "pushing static files to s3://awe-static-files"
     aws --profile awe-publisher s3 cp \
-        awe/resources/client/awe/build s3://awe-static-files/dist/${version} \
+        ${gzipped_static_files_dir} s3://awe-static-files/dist/${version} \
         --recursive \
         --acl public-read \
+        --content-encoding gzip \
         --exclude "*.map"
 }
 
@@ -59,6 +72,7 @@ main()
     validate
     tag
     publish_pypi
+    gzip_static_files
     publish_static_files
 }
 
