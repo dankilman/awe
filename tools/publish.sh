@@ -31,7 +31,6 @@ validate_ci()
     local status_commit="$(echo ${full_status} | jq '.[].vcs_revision' -r)"
     local job_name="$(echo ${full_status} | jq '.[].workflows.job_name' -r)"
     test "${status}" = 'success' || exit_with "Last ${master_branch} build failed"
-    test "${job_name}" = 'build' || test "${job_name}" = "build37" || exit_with "Missing build/build37"
     test "${status_commit}" = "${local_commit}" || exit_with "CircleCI commit sha differs from local commit sha"
     export ${job_name}_found=true
 }
