@@ -27,6 +27,7 @@ setup(
         'bottle',
         'autobahn[twisted]',
         'twisted',
+        'txaio',
         'pydash',
         'typing'
     ],

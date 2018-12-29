@@ -6,6 +6,7 @@ Your contributions to this world are greatly appreciated.
 - [bottle (MIT)](https://github.com/bottlepy/bottle)
 - [autobahn (MIT)](https://github.com/crossbario/autobahn-python)
 - [twisted (MIT)](https://github.com/twisted/twisted)
+- [txaio (MIT)](https://github.com/crossbario/txaio)
 - [pydash (MIT)](https://github.com/dgilland/pydash)
 - [react (MIT)](https://github.com/facebook/react)
 - [redux (MIT)](https://github.com/reduxjs/redux)

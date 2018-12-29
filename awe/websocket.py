@@ -1,9 +1,9 @@
 import json
 import sys
 import threading
-import txaio
 
 import six
+import txaio
 
 if six.PY2:
     from twisted.python import log
