@@ -138,6 +138,28 @@ if __name__ == '__main__':
     main()
 ```
 
+### Offline
+
+You can also generate the page content offline, in python only and export it in code by calling `page.export()`.
+
+The return value of `export` is the return value of `export_fn` which defaults to the static html content as string.
+
+e.g:
+
+```python
+from awe import Page
+
+def main():
+    page = Page(offline=True)
+    page.new_text('Hello')
+    print page.export()
+    # you can override the export_fn supplied during creation by passing
+    print page.export(export_fn=lambda index_html: index_html[:100])
+    
+
+if __name__ == '__main__':
+    main()
+``` 
 
 ## Examples
 

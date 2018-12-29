@@ -1,5 +1,8 @@
 import json
+import os
 import re
+
+from . import resources
 
 BASE_STATIC_URL = 'https://s3.amazonaws.com/awe-static-files/dist'
 
@@ -24,18 +27,23 @@ resource_patterns = {
 
 class Exporter(object):
 
-    def __init__(self, export_fn):
-        self.export_fn = export_fn or self.default_export_fn
-
-    def export(self, index, state):
+    def __init__(self, export_fn, get_initial_state):
         from . import __version__
-        base_url = '{}/{}'.format(BASE_STATIC_URL, __version__)
-        index = index.replace(favicon, '{}/{}'.format(base_url, 'favicon.ico'), 1)
+        self.client_root = 'client/awe/build'
+        self.export_fn = export_fn or self.default_export_fn
+        self.get_initial_state = get_initial_state
+        self.index = resources.get(os.path.join(self.client_root, 'index.html'))
+        self.base_url = '{}/{}'.format(BASE_STATIC_URL, __version__)
+
+    def export(self, export_fn=None):
+        export_fn = export_fn or self.export_fn
+        state = self.get_initial_state()
+        index = self.index.replace(favicon, '{}/{}'.format(self.base_url, 'favicon.ico'), 1)
         for key, pattern in resource_patterns.items():
-            index = pattern.sub('{}/{}'.format(base_url, r'\1'), index, 1)
+            index = pattern.sub('{}/{}'.format(self.base_url, r'\1'), index, 1)
         json_state = json.dumps(state, separators=(',', ':'))
         index = index.replace(frozen_state_format('null'), frozen_state_format(json_state), 1)
-        return self.export_fn(index)
+        return export_fn(index)
 
     @staticmethod
     def default_export_fn(index_html):
