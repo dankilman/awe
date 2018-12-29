@@ -1,3 +1,4 @@
+import sys
 import os
 import tempfile
 import time
@@ -16,7 +17,7 @@ def export_fn(index_html):
 def main():
     page = Page(offline=True, export_fn=export_fn)
     page.new_text('Hello')
-    print page.export()['path']
+    sys.stdout.write(page.export()['path'])
 
 
 if __name__ == '__main__':

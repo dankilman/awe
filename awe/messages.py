@@ -18,7 +18,7 @@ class MessageHandler(object):
         self.pool = ThreadPool(1)
 
     def handle(self, message):
-        # messages come from the tornado event loop so we
+        # messages come from the tornado/asyncio event loop so we
         # process them in a different thread, as it may block
         self.pool.apply_async(self.handler, args=(message,))
 

@@ -2,7 +2,7 @@ import time
 
 from .view import Element
 
-number_types = (int, float, long)
+number_types = (int, float)
 now_ms = (lambda: int(time.time() * 1000))
 
 
@@ -229,7 +229,7 @@ class Chart(Element):
         elif isinstance(transformer, dict):
             transformer_key = transformer.pop('type')
             return transformer_classes[transformer_key](**transformer)
-        if isinstance(transformer, basestring):
+        if isinstance(transformer, str):
             if transformer in transformers:
                 return transformers[transformer]
             maybe_dict_transformer = DictLevelsTransformer.from_str(transformer)

@@ -330,7 +330,7 @@ class Table(Element):
 
     def _init(self, headers, page_size):
         if isinstance(headers, dict):
-            headers = headers.keys()
+            headers = list(headers.keys())
         self.update_data({'headers': headers, 'rows': deque()})
         self.update_props({
             'size': 'small',

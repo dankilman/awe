@@ -23,6 +23,7 @@ setup(
         'awe.resources'
     ],
     install_requires=[
+        'six',
         'bottle',
         'autobahn[twisted]',
         'twisted',

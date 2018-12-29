@@ -1,9 +1,49 @@
 version: 2
 
+# TODO check circle ci docs on how to reuse steps (so both jobs aren't duplicated)
+# TODO check when circleci add a 3.7 image
+
 jobs:
   build:
     docker:
     - image: circleci/python:2.7-jessie-node-browsers
+    steps:
+    - checkout
+    - run:
+        name: npm install
+        command: cd awe/resources/client/awe && npm install
+    - run:
+        command: virtualenv build-env
+    - run:
+        name: install package in build env
+        command: source build-env/bin/activate && pip install -e .
+    - run:
+        name: install build requirements
+        command: source build-env/bin/activate && pip install -r build-requirements.txt
+    - run:
+        name: make build
+        command: source build-env/bin/activate && make build
+    - run:
+        name: verify generated README.md is up to date
+        command: diff README.md <(git show HEAD:README.md)
+    - run:
+        command: virtualenv test-env
+    - run:
+        name: pip install dist
+        command: source test-env/bin/activate && pip install dist/*
+    - run:
+        name: install test requirements
+        command: source test-env/bin/activate && pip install -r test-requirements.txt
+    - run:
+        name: make test
+        command: source test-env/bin/activate && make test
+    - run:
+        name: check isolated dist package
+        command: source test-env/bin/activate && cd test-env && python -c 'import awe; awe.Page()'
+
+  build-3.6:
+    docker:
+    - image: circleci/python:3.6-jessie-node-browsers
     steps:
     - checkout
     - run:
@@ -43,3 +83,4 @@ workflows:
   workflow:
     jobs:
     - build
+    - build-3.6

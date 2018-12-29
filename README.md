@@ -32,6 +32,16 @@ Finding a decent unused name is not an easy task!
 pip install awe
 ```
 
+## Supported Python Versions
+Tested on Python 2.7.15 and 3.7.1
+
+Should work on many earlier versions I suppose, but haven't been tested so you can't be sure.
+
+These days, I'm mostly working with python 2.7, so things may unintentionally break on python 3.
+
+Support for Python 3 has been added after initial development, so please open an issue if something
+seems broken under python 3. In fact, open an issue if something seems broken under any python version :)
+
 ## Getting Started
 
 The basic idea in `awe` is that you create an `awe.Page()` instance in the beginning of your script. e.g:
@@ -386,7 +396,6 @@ def main():
     page.start()
     try:
         for i in range(1000):
-            print i
             kitchen.update(i)
             time.sleep(5)
     except KeyboardInterrupt:

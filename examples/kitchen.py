@@ -65,7 +65,6 @@ def main():
     page.start()
     try:
         for i in range(1000):
-            print i
             kitchen.update(i)
             time.sleep(5)
     except KeyboardInterrupt:
