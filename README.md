@@ -114,7 +114,7 @@ from utils import save_to_s3  # example import, not something awe comes bundled 
 def custom_export_fn(index_html):
     # index_html is the static html content as a string.
     # You can, for example, save the content to S3.
-    key='page-{}.html'.format(time.time()) 
+    key = 'page-{}.html'.format(time.time()) 
     save_to_s3(
         bucket='my_bucket', 
         key=key, 
