@@ -27,6 +27,9 @@ function doExport(dispatch, shouldDisplayOptions) {
     startExportLoading();
     try {
       const response = await instance.fetchExport();
+      if (!response) {
+        return;
+      }
       const text = await response.text();
       let json = null;
       for (const [h, v] of response.headers.entries()) {
