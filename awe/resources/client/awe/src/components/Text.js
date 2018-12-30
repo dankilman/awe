@@ -11,7 +11,7 @@ class Text extends Component {
           if (line) {
             return <div {...props} key={i.toString()}>{line}</div>;
           } else {
-            return <br key={i.toString()}/>
+            return <br {...props} key={i.toString()}/>
           }
         })}
       </div>

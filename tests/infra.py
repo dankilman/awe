@@ -52,3 +52,18 @@ def retry(attempts=10, interval=1):
                     time.sleep(interval)
         return wrapper
     return partial
+
+
+@pytest.fixture()
+def element_tester(driver, page):
+    def tester(builder, finder):
+        builder(page)
+
+        page.start(open_browser=False)
+
+        def new_finder():
+            driver.get('http://localhost:{}'.format(page._port))
+            finder(driver)
+
+        retry()(new_finder)()
+    return tester

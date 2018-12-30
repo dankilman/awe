@@ -1,13 +1,15 @@
-from ..infra import driver, page, retry
-
-DIVIDER_CLASS = 'ant-divider'
+from ..infra import element_tester, driver, page
 
 
-def test_divider(driver, page):
-    @retry()
-    def find_divider():
-        driver.get('http://localhost:{}'.format(page._port))
-        driver.find_element_by_class_name(DIVIDER_CLASS)
-    page.new_divider()
-    page.start(open_browser=False)
-    find_divider()
+def test_divider(element_tester):
+    divider_class = 'divider1'
+
+    def builder(page):
+        page.new_divider(props={'className': divider_class})
+
+    def finder(driver):
+        element = driver.find_element_by_class_name(divider_class)
+        assert element.tag_name == 'div'
+        assert 'ant-divider' in element.get_attribute('class')
+
+    element_tester(builder, finder)
