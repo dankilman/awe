@@ -31,3 +31,6 @@ bump-patch-version:
 
 bump-minor-version:
 	python tools/bump_version.py minor
+
+finish-feature:
+	tools/finish-feature.sh
