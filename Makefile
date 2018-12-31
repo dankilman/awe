@@ -22,6 +22,7 @@ pytest:
 	pytest tests/view/test_divider.py
 	pytest tests/view/test_text.py
 	pytest tests/view/test_button.py
+	pytest tests/view/test_input.py
 
 build: clean build-client build-package update-readme
 
