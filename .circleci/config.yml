@@ -36,6 +36,10 @@ commands:
     - run:
         name: check isolated dist package
         command: source test-env/bin/activate && cd test-env && python -c 'import awe; awe.Page()'
+    - store_artifacts:
+        path: test-reports
+    - store_test_results:
+        path: test-reports
 
 jobs:
   build:

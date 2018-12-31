@@ -1,3 +1,4 @@
 pytest
+pytest-forked
 flake8
 selenium

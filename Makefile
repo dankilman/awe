@@ -17,12 +17,7 @@ flake8:
 	flake8 awe
 
 pytest:
-	# TODO use a subprocess pytest plugin to avoid this horrible maintenance hell
-	pytest tests/test_sanity.py
-	pytest tests/view/test_divider.py
-	pytest tests/view/test_text.py
-	pytest tests/view/test_button.py
-	pytest tests/view/test_input.py
+	pytest --forked --junit-xml=test-reports/pytest/report.xml tests
 
 build: clean build-client build-package update-readme
 
