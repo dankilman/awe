@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
 ### [`hello_world.py`](examples/hello_world.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/hello_world.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/hello_world.html)
 
 The most basic page with a single text element.
 
@@ -199,7 +199,7 @@ if __name__ == '__main__':
 
 ### [`button_and_input.py`](examples/button_and_input.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.html)
 
 A page with a button and two inputs.
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
 ### [`chart_simple.py`](examples/chart_simple.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.html)
 
 A page with a single chart.
 
@@ -285,7 +285,7 @@ if __name__ == '__main__':
 
 ### [`chart_complex.py`](examples/chart_complex.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.html)
 
 A page with a single chart.
 
@@ -331,7 +331,7 @@ if __name__ == '__main__':
 
 ### [`kitchen.py`](examples/kitchen.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html)
 
 A page that showcases many different element types supported by `awe`.
 
@@ -431,7 +431,7 @@ if __name__ == '__main__':
 
 ### [`page_properties.py`](examples/page_properties.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/page_properties.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/page_properties.html)
 
 A page that demonstrates how to set the page title, width and override its style.
 
@@ -455,7 +455,7 @@ if __name__ == '__main__':
 
 ### [`standard_output.py`](examples/standard_output.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/standard_output.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/standard_output.html)
 
 A page that demonstrates adding text dynamically to a page after it has been started.
 
@@ -485,7 +485,7 @@ if __name__ == '__main__':
 
 ### [`collapse.py`](examples/collapse.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/collapse.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/collapse.html)
 
 A page with a single collapse element. 
 
@@ -515,7 +515,7 @@ if __name__ == '__main__':
 
 ### [`chart_flat.py`](examples/chart_flat.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.html)
 
 A page with a single chart.
 

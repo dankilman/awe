@@ -176,7 +176,7 @@ if __name__ == '__main__':
 {% macro example(name, extension='gif') -%}
 ### [`{{name}}.py`](examples/{{name}}.py) 
 
-#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/{{name}}.html)
+#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/{{name}}.html)
 
 {{ docstring(name) }}
 ```python
