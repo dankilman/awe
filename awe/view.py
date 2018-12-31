@@ -276,7 +276,7 @@ class Divider(Element):
 class Collapse(Element):
 
     def _init(self):
-        self.update_props({'defaultActiveKey': []})
+        self.update_props({'defaultActiveKey': []}, override=False)
 
     def _new_child(self, cls, **kwargs):
         assert issubclass(cls, Panel)
