@@ -3,6 +3,7 @@ from ..infra import element_tester, driver, page
 
 def test_text(element_tester):
     text1 = 'some text'
+    text1_new = 'some new text'
     text1_class = 'text1'
     text2 = ''
     text2_class = 'text2'
@@ -10,8 +11,10 @@ def test_text(element_tester):
     text3_class = 'text3'
     text4_class = 'text4'
 
+    state = {}
+
     def builder(page):
-        page.new_text(text1, props={'className': text1_class})
+        state['text1'] = page.new_text(text1, props={'className': text1_class})
         page.new_text(text2, props={'className': text2_class})
         page.new_text(text3, props={'className': text3_class})
         page.new_text(props={'className': text4_class})
@@ -35,4 +38,16 @@ def test_text(element_tester):
             assert e.tag_name == 'div'
             assert e.text == s
 
-    element_tester(builder, finder)
+    def modifier(page):
+        state['text1'].text = text1_new
+
+    def finder2(driver):
+        element1 = driver.find_element_by_class_name(text1_class)
+        assert element1.text == text1_new
+
+    element_tester(
+        builder,
+        finder,
+        modifier,
+        finder2
+    )
