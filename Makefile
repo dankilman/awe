@@ -34,3 +34,9 @@ bump-minor-version:
 
 finish-feature:
 	tools/finish-feature.sh
+
+export-examples:
+	python tools/export_examples.py
+
+publish-examples:
+	tools/publish-examples.sh

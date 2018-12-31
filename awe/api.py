@@ -9,6 +9,8 @@ from . import webserver
 from . import websocket
 from . import export
 
+page = None
+
 
 class Page(view.Element):
 
@@ -37,6 +39,10 @@ class Page(view.Element):
         self._ws_server = websocket.WebSocketServer(self._message_handler, port=ws_port)
         self._started = False
         self._version = 0
+        self._closed = False
+        if os.environ.get('AWE_SET_GLOBAL'):
+            global page
+            page = self
 
     def start(self, block=False, open_browser=True, develop=False):
         """
@@ -67,6 +73,21 @@ class Page(view.Element):
         """
         return self._exporter.export(export_fn)
 
+    def block(self):
+        """
+        Utility method to block after page has been started
+        """
+        if self._offline:
+            return
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
+
+    def close(self):
+        self._closed = True
+
     def _get_initial_state(self):
         return {
             'children': [t._get_view() for t in self.children],
@@ -83,6 +104,8 @@ class Page(view.Element):
         self._registry.register(obj, obj_id)
 
     def _dispatch(self, action, client_id=None):
+        if self._closed:
+            raise RuntimeError('page is closed')
         self._increase_version()
         if not self._started:
             return
@@ -100,14 +123,3 @@ class Page(view.Element):
         for key, default in defaults.items():
             style.setdefault(key, default)
         return style
-
-    @staticmethod
-    def block():
-        """
-        Utility method to block after page has been started
-        """
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            pass

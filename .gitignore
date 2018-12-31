@@ -72,3 +72,4 @@ data
 *yarn-error.log*
 .pytest_cache
 test-reports/**/*.xml
+published-examples*

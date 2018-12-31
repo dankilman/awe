@@ -175,20 +175,32 @@ if __name__ == '__main__':
 
 
 
-### [`hello_world.py`](examples/hello_world.py)
+### [`hello_world.py`](examples/hello_world.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/hello_world.html)
+
 The most basic page with a single text element.
 
 ```python
 from awe import Page
 
-page = Page()
-page.new_text('Hello World!')
-page.start(block=True)
+
+def main():
+    page = Page()
+    page.new_text('Hello World!')
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
 
  ```
 ![image](docs/images/hello_world.png)
 
-### [`button_and_input.py`](examples/button_and_input.py)
+### [`button_and_input.py`](examples/button_and_input.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.html)
+
 A page with a button and two inputs.
 
 Clicking the button or hitting enter when the second input is focused, runs `do_stuff`
@@ -226,7 +238,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/button_and_input.gif)
 
-### [`chart_simple.py`](examples/chart_simple.py)
+### [`chart_simple.py`](examples/chart_simple.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.html)
+
 A page with a single chart.
 
 The chart is initialized with a single data item and then updated every 1 second with a new data item.
@@ -268,7 +283,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/chart_simple.gif)
 
-### [`chart_complex.py`](examples/chart_complex.py)
+### [`chart_complex.py`](examples/chart_complex.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.html)
+
 A page with a single chart.
 
 The chart is initialized with a single data item and then updated every 5 seconds.
@@ -311,7 +329,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/chart_complex.gif)
 
-### [`kitchen.py`](examples/kitchen.py)
+### [`kitchen.py`](examples/kitchen.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html)
+
 A page that showcases many different element types supported by `awe`.
 
 The following element types are used:
@@ -408,7 +429,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/kitchen.gif)
 
-### [`page_properties.py`](examples/page_properties.py)
+### [`page_properties.py`](examples/page_properties.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/page_properties.html)
+
 A page that demonstrates how to set the page title, width and override its style.
 
 ```python
@@ -429,7 +453,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/page_properties.png)
 
-### [`standard_output.py`](examples/standard_output.py)
+### [`standard_output.py`](examples/standard_output.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/standard_output.html)
+
 A page that demonstrates adding text dynamically to a page after it has been started.
 
 The elements are created with a custom style.
@@ -456,7 +483,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/standard_output.gif)
 
-### [`collapse.py`](examples/collapse.py)
+### [`collapse.py`](examples/collapse.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/collapse.html)
+
 A page with a single collapse element. 
 
 The collapse has 3 panels. The first panel defaults to being expanded. The other two panels default to collapsed.
@@ -483,7 +513,10 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/collapse.png)
 
-### [`chart_flat.py`](examples/chart_flat.py)
+### [`chart_flat.py`](examples/chart_flat.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.html)
+
 A page with a single chart.
 
 The chart is initialized with a single data item and then updated every 0.7 seconds with a new data item.

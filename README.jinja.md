@@ -174,7 +174,10 @@ if __name__ == '__main__':
 ## Examples
 
 {% macro example(name, extension='gif') -%}
-### [`{{name}}.py`](examples/{{name}}.py)
+### [`{{name}}.py`](examples/{{name}}.py) 
+
+#### [Demo](https://s3.amazonaws.com/awe-static-files/examples/{{name}}.html)
+
 {{ docstring(name) }}
 ```python
 {{ load(name) }}
