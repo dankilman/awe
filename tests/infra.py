@@ -57,7 +57,7 @@ def retry(attempts=10, interval=1):
 
 @pytest.fixture()
 def element_tester(driver, page):
-    def tester(builder, finder):
+    def tester(builder, finder, *rest):
         builder(page)
 
         page.start(open_browser=False)
@@ -67,4 +67,12 @@ def element_tester(driver, page):
             finder(driver)
 
         retry()(new_finder)()
+
+        assert len(rest) % 2 == 0
+        for i in range(0, len(rest), 2):
+            current_modifier = rest[i]
+            current_finder = rest[i + 1]
+            current_modifier(page)
+            retry()(current_finder)(driver)
+
     return tester
