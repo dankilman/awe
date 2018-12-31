@@ -21,6 +21,7 @@ pytest:
 	pytest tests/test_sanity.py
 	pytest tests/view/test_divider.py
 	pytest tests/view/test_text.py
+	pytest tests/view/test_button.py
 
 build: clean build-client build-package update-readme
 

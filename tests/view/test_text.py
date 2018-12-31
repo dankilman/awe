@@ -8,11 +8,13 @@ def test_text(element_tester):
     text2_class = 'text2'
     text3 = 'some multiline\ntext\nbecause this is what is being tested'
     text3_class = 'text3'
+    text4_class = 'text4'
 
     def builder(page):
         page.new_text(text1, props={'className': text1_class})
         page.new_text(text2, props={'className': text2_class})
         page.new_text(text3, props={'className': text3_class})
+        page.new_text(props={'className': text4_class})
 
     def finder(driver):
         elements1 = driver.find_elements_by_class_name(text1_class)
@@ -22,6 +24,9 @@ def test_text(element_tester):
         elements2 = driver.find_elements_by_class_name(text2_class)
         assert len(elements2) == 1
         assert elements2[0].tag_name == 'br'
+        elements4 = driver.find_elements_by_class_name(text4_class)
+        assert len(elements4) == 1
+        assert elements4[0].tag_name == 'br'
         elements3 = driver.find_elements_by_class_name(text3_class)
         assert len(elements3) == 3
         split1, split2, split3 = text3.split('\n')

@@ -29,6 +29,7 @@ def driver():
     for argument in arguments:
         options.add_argument(argument)
     result = webdriver.Chrome(options=options)
+    result.set_window_size(1600, 1000)
     yield result
     result.close()
 
