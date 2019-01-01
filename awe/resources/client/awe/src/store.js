@@ -59,6 +59,7 @@ function addChartData(data) {
 const updateElementActions = {
   append: data => list => list.push(data),
   prepend: data => list => list.unshift(data),
+  extend: data => list => list.concat(data),
   addChartData
 };
 

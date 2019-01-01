@@ -375,8 +375,9 @@ class Table(Element):
 
         :param rows: The rows to append
         """
-        for row in rows:
-            self.append(row)
+        rows_data = [self._row_data(r, i) for i, r in enumerate(rows)]
+        self.data['rows'].extend(rows_data)
+        self.update_element(path=['data', 'rows'], action='extend', data=rows_data)
 
     def _add_row(self, row, action):
         row_data = self._row_data(row)
