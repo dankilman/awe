@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/dankilman/awe.svg?style=svg)](https://circleci.com/gh/dankilman/awe)
 [![PyPI version](https://badge.fury.io/py/awe.svg)](https://badge.fury.io/py/awe)
 
-Dynamic web based reports/dashboards in python.
+Dynamic web based reports/dashboards in Python.
 
 ## Motivation:
 
@@ -37,10 +37,11 @@ Tested on Python 2.7.15 and 3.7.1
 
 Should work on many earlier versions I suppose, but haven't been tested so you can't be sure.
 
-These days, I'm mostly working with python 2.7, so things may unintentionally break on python 3.
+These days, I'm mostly working with Python 2.7, so things may unintentionally break on Python 3.
+That being said, the test suite runs on both versions, so changes for that happening are not very high.
 
 Support for Python 3 has been added after initial development, so please open an issue if something
-seems broken under python 3. In fact, open an issue if something seems broken under any python version :)
+seems broken under Python 3. In fact, open an issue if something seems broken under any Python version :)
 
 ## Getting Started
 
