@@ -1,8 +1,8 @@
 let instance = null;
 
 class Awe {
-  constructor({processor, host, port}) {
-    this.processor = processor;
+  constructor({store, host, port}) {
+    this.store = store;
     this.finishedInitialFetch = false;
     this.clientId = null;
     this.pendingActions = [];
@@ -10,11 +10,11 @@ class Awe {
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = (error) => console.error('ws error', error);
     Awe.fetchInitialState().then((initialState) => {
-      this.processor.processInitialState(initialState);
+      Awe.processInitialState(this.store, initialState);
       const {version} = initialState;
       for (const pendingAction of this.pendingActions) {
         if (pendingAction.version > version) {
-          this.processor.dispatch(pendingAction);
+          this.store.dispatch(pendingAction);
         }
       }
       this.pendingActions = [];
@@ -22,7 +22,7 @@ class Awe {
     });
   }
 
-  static start({processor, host = '127.0.0.1', port = 9000, initialState}) {
+  static start({store, host = '127.0.0.1', port = 9000, initialState}) {
     if (initialState) {
       const notSupported = () => console.warn('This is not supported in offline mode');
       instance = {
@@ -30,9 +30,11 @@ class Awe {
         updateVariable: notSupported,
         fetchExport: notSupported
       };
-      setTimeout(() => processor.processInitialState(initialState), 0);
+      setTimeout(() => {
+        Awe.processInitialState(store, initialState);
+      }, 0);
     } else {
-      instance = new Awe({processor, host, port});
+      instance = new Awe({store, host, port});
     }
     return instance;
   }
@@ -64,10 +66,14 @@ class Awe {
     } else if (!this.finishedInitialFetch) {
       this.pendingActions.push(action);
     } else {
-      this.processor.dispatch(action);
+      this.store.dispatch(action);
     }
   };
 
+  static processInitialState(store, initialState) {
+    document.title = initialState.title;
+    store.dispatch({type: 'processInitialState', ...initialState});
+  }
 }
 
 export default Awe;

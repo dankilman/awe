@@ -62,8 +62,29 @@ const updateElementActions = {
   addChartData
 };
 
-function setStyle(state, {style}) {
-  return state.set('style', fromJS(style));
+function processElement(map, element) {
+  const {children, id} = element;
+  map = newElement(map, element);
+  if (children) {
+    for (const child of children) {
+      child.parentId = id;
+      map = processElement(map, child);
+    }
+  }
+  return map;
+}
+
+function processInitialState(state, {style, variables, children}) {
+  return state.withMutations(map => {
+    map = map.set('style', fromJS(style));
+    for (const variable of Object.values(variables)) {
+      map = newVariable(map, variable)
+    }
+    for (const child of children) {
+      map = processElement(map, child);
+    }
+    return map;
+  });
 }
 
 function newElement(state, {id, index, data, parentId, elementType, props = {}}) {
@@ -116,7 +137,7 @@ function displayExportObjectResult(state, {displayExportObjectResult}) {
 }
 
 const reducers = {
-  setStyle,
+  processInitialState,
   newElement,
   newVariable,
   updateElement: updatePath('elements'),
