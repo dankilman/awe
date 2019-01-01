@@ -11,12 +11,13 @@ function doExport(dispatch, shouldDisplayOptions) {
   const displayOptions = () => dispatch(actions.displayOptions);
   const startExportLoading = () => dispatch(actions.startExportLoading);
   const endExportLoading = () => dispatch(actions.endExportLoading);
+  const hideOptions = () => dispatch(actions.hideOptions);
   const displayError = (error) => {
-    dispatch(actions.hideOptions);
+    hideOptions();
     dispatch(actions.displayError(error))
   };
   const displayExportObjectResult = (result) => {
-    dispatch(actions.hideOptions);
+    hideOptions();
     dispatch(actions.displayExportObjectResult(result));
   };
 
@@ -28,6 +29,8 @@ function doExport(dispatch, shouldDisplayOptions) {
     try {
       const response = await instance.fetchExport();
       if (!response) {
+        hideOptions();
+        Modal.warn({title: 'Page is already exported'});
         return;
       }
       const text = await response.text();
