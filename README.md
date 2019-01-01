@@ -5,55 +5,38 @@
 
 Dynamic web based reports/dashboards in Python.
 
-## Motivation:
+## What is `awe` for?
 
 `awe` use cases:
 - Create a report for some data you collected in your scripts.
-- Poll some data/state in your script and update a chart displaying that data.
+- Poll some data in your script and update a chart with it.
 - A replacement for print statements in your scripts that can include 
   interactive tables, charts, headers, colors, etc... with minimum fuss.
 
 `awe` isn't for you if you need to:
-- Do web development.
-- Handle a massive amount of data. `awe` is quite wasteful in terms of resources. This works
+- Handle large amounts of data. `awe` is quite wasteful in terms of resources. This works
   well for small-ish amounts of data. On the other hand, charts with many points will
-  probably make your browser completely unresponsive (not benchmarked yet, just a hunch).
+  probably make your browser completely unresponsive.
 
 Under the hood, `awe` generates the page using react.
-
-## Why is it named `awe`?
-
-I like short names. I initially called this package `pages` but then discovered it is already taken in `pypi`.
-Finding a decent unused name is not an easy task!
-
 
 ## Installation
 ```bash
 pip install awe
 ```
 
-## Supported Python Versions
-Tested on Python 2.7.15 and 3.7.1
-
-Should work on many earlier versions I suppose, but haven't been tested so you can't be sure.
-
-These days, I'm mostly working with Python 2.7, so things may unintentionally break on Python 3.
-That being said, the test suite runs on both versions, so changes for that happening are not very high.
-
-Support for Python 3 has been added after initial development, so please open an issue if something
-seems broken under Python 3. In fact, open an issue if something seems broken under any Python version :)
-
 ## Getting Started
 
-The basic idea in `awe` is that you create an `awe.Page()` instance in the beginning of your script. e.g:
+Begin by creating an `awe.Page()` instance. e.g:
 
 ```python
 from awe import Page
 page = Page()
 ```
 
-The page is built by creating a hierarchy of elements. Every element, including the root `Page` element, exposes
-`new_XXX()` methods that create element children.
+A page is built by creating a hierarchy of elements. 
+
+Every element, including the root `Page` element, exposes `new_XXX()` methods that create element children.
 
 These methods can create leaf elements such as `new_text()`, `new_table()`, etc... e.g:
 
@@ -96,89 +79,11 @@ page.start(open_browser=False)
 
 The [examples](#examples) section can be used as reference for the different elements that can be created with `awe`.
 
-## Export To Static HTML
-
-At any point during the lifetime of a page you can export its current state to a standalone `html` file you can
-freely share.
-
-You can export in any of the following ways:
-- Open the options by clicking the options button at the top right and then click **Export**.
-- Open the options by holding `Shift` and typing `A A A` (three consecutive A's) and then click **Export**.
-- Hold `Shift` and type `A A E` (two A's then E).
-
-Note that for the keyboard shortcuts to work, the focus should be on some page content.
-
-### Export function
-
-By default, when you export a page, the result is simply downloaded as a static file.
-
-You can override this default behavior by passing an `export_fn` argument when creating the `Page` instance. e.g:
-
-```python
-import time
-
-from awe import Page
-
-from utils import save_to_s3  # example import, not something awe comes bundled with
-
-
-def custom_export_fn(index_html):
-    # index_html is the static html content as a string.
-    # You can, for example, save the content to S3.
-    key = 'page-{}.html'.format(time.time()) 
-    save_to_s3(
-        bucket='my_bucket', 
-        key=key, 
-        content=index_html
-    )
-    
-    # Returning a dict from the export_fn function tells awe to skip the default download behavior.
-    # awe will also display a simple key/value table modal built from the dict result.
-    # Returning anything else is expected to be a string that will be downloaded in the browser.
-    # This can be the unmodified index_html, a modified one, a json with statistics, etc...
-    return {'status': 'success', 'key': key}
-
-
-def main():
-    page = Page(export_fn=custom_export_fn)
-    page.new_text('Hello')
-    page.start(block=True)
-
-
-if __name__ == '__main__':
-    main()
-```
-
-### Offline
-
-You can also generate the page content offline, in python only and export it in code by calling `page.export()`.
-
-The return value of `export` is the return value of `export_fn` which defaults to the static html content as string.
-
-e.g:
-
-```python
-from awe import Page
-
-def main():
-    page = Page(offline=True)
-    page.new_text('Hello')
-    print page.export()
-    # you can override the export_fn supplied during creation by passing
-    print page.export(export_fn=lambda index_html: index_html[:100])
-    
-
-if __name__ == '__main__':
-    main()
-``` 
-
 ## Examples
 
 
 
-### [`hello_world.py`](examples/hello_world.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/hello_world.html)
+### [hello_world.py](examples/hello_world.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/hello_world.html))
 
 The most basic page with a single text element.
 
@@ -198,50 +103,7 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/hello_world.png)
 
-### [`button_and_input.py`](examples/button_and_input.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.html)
-
-A page with a button and two inputs.
-
-Clicking the button or hitting enter when the second input is focused, runs `do_stuff`
-which gets a reference to the input values and the button element using the `@inject` decorator.
-
-`do_stuff` in turn, updates the button text.
-
-```python
-from awe import Page, inject
-
-
-@inject(variables=['input1', 'input2'], elements=['button1'])
-def do_stuff(input1, input2, button1):
-    text = '{} {} {}'.format(button1.count, input1, input2)
-    button1.text = text
-    button1.count += 1
-
-
-def main():
-    page = Page()
-    b = page.new_button(do_stuff, id='button1')
-    b.count = 0
-    page.new_input(id='input1')
-    page.new_input(
-        placeholder='Input 2, write anything!',
-        on_enter=do_stuff,
-        id='input2'
-    )
-    page.start(block=True)
-
-
-if __name__ == '__main__':
-    main()
-
- ```
-![image](docs/images/button_and_input.gif)
-
-### [`chart_simple.py`](examples/chart_simple.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.html)
+### [chart_simple.py](examples/chart_simple.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.html))
 
 A page with a single chart.
 
@@ -284,9 +146,7 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/chart_simple.gif)
 
-### [`chart_complex.py`](examples/chart_complex.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.html)
+### [chart_complex.py](examples/chart_complex.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.html))
 
 A page with a single chart.
 
@@ -330,9 +190,174 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/chart_complex.gif)
 
-### [`kitchen.py`](examples/kitchen.py) 
+### [chart_flat.py](examples/chart_flat.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.html))
 
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html)
+A page with a single chart.
+
+The chart is initialized with a single data item and then updated every 0.7 seconds with a new data item.
+
+The chart has a moving time window of 3 minutes.
+
+The data added to the chart is transformed by the `flat` transformer. It builds charts from the different combinations
+of the `chart_mapping` list. It builds the chart series from the different combinations
+of the `series_mapping` list. The values are extracted from the `value_key` key.
+
+```python
+import time
+import random
+
+from awe import Page
+
+
+def generate_random_data():
+    return [{
+        'color': random.choice(['blue', 'yellow']),
+        'fruit': random.choice(['apple', 'orange']),
+        'temp': random.choice(['cold', 'hot']),
+        'city': random.choice(['Tel Aviv', 'New York']),
+        'value': random.randint(1, 100)
+    }]
+
+
+def main():
+    page = Page()
+    data = generate_random_data()
+    chart = page.new_chart(data=data, transform={
+        'type': 'flat',
+        'chart_mapping': ['color', 'fruit'],
+        'series_mapping': ['temp', 'city'],
+        'value_key': 'value'
+    }, moving_window=3 * 60)
+    page.start()
+    while True:
+        time.sleep(0.7)
+        chart.add(generate_random_data())
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/chart_flat.gif)
+
+### [page_properties.py](examples/page_properties.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/page_properties.html))
+
+A page that demonstrates how to set the page title, width and override its style.
+
+```python
+from awe import Page
+
+
+def main():
+    page = Page('Page Properties', width=600, style={
+        'backgroundColor': 'red'
+    })
+    page.new_card('hello')
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/page_properties.png)
+
+### [button_and_input.py](examples/button_and_input.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.html))
+
+A page with a button and two inputs.
+
+Clicking the button or hitting enter when the second input is focused, runs `do_stuff`
+which gets a reference to the input values and the button element using the `@inject` decorator.
+
+`do_stuff` in turn, updates the button text.
+
+```python
+from awe import Page, inject
+
+
+@inject(variables=['input1', 'input2'], elements=['button1'])
+def do_stuff(input1, input2, button1):
+    text = '{} {} {}'.format(button1.count, input1, input2)
+    button1.text = text
+    button1.count += 1
+
+
+def main():
+    page = Page()
+    b = page.new_button(do_stuff, id='button1')
+    b.count = 0
+    page.new_input(id='input1')
+    page.new_input(
+        placeholder='Input 2, write anything!',
+        on_enter=do_stuff,
+        id='input2'
+    )
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/button_and_input.gif)
+
+### [standard_output.py](examples/standard_output.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/standard_output.html))
+
+A page that demonstrates adding text dynamically to a page after it has been started.
+
+The elements are created with a custom style.
+ 
+```python
+import time
+
+from awe import Page
+
+
+def main():
+    page = Page()
+    page.start()
+    page.new_text('Header', style={'fontSize': '1.5em', 'color': '#ff0000'})
+    for i in range(20):
+        page.new_text('{} hello {}'.format(i, i), style={'color': 'blue'})
+        time.sleep(2)
+    page.block()
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/standard_output.gif)
+
+### [collapse.py](examples/collapse.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/collapse.html))
+
+A page with a single collapse element. 
+
+The collapse has 3 panels. The first panel defaults to being expanded. The other two panels default to collapsed.
+
+```python
+from awe import Page
+
+
+def main():
+    page = Page()
+    collapse = page.new_collapse()
+    panel1 = collapse.new_panel('Panel 1', active=True)
+    panel1.new_text('Hello From Panel 1')
+    panel2 = collapse.new_panel('Panel 2', active=False)
+    panel2.new_text('Hello From Panel2')
+    panel3 = collapse.new_panel('Panel 3')
+    panel3.new_text('Hello From Panel3')
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/collapse.png)
+
+### [kitchen.py](examples/kitchen.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html))
 
 A page that showcases many different element types supported by `awe`.
 
@@ -430,138 +455,95 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/kitchen.gif)
 
-### [`page_properties.py`](examples/page_properties.py) 
 
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/page_properties.html)
+## Supported Python Versions
+Tested on Python 2.7.15 and 3.7.1
 
-A page that demonstrates how to set the page title, width and override its style.
+Should work on many earlier versions I suppose, but haven't been tested so you can't be sure.
+
+These days, I'm mostly working with Python 2.7, so things may unintentionally break on Python 3.
+That being said, the test suite runs on both versions, so chances of that happening are not very high.
+
+Support for Python 3 has been added after initial development, so please open an issue if something
+seems broken under Python 3. In fact, open an issue if something seems broken under any Python version :)
+
+## Export To Static HTML
+
+At any point during the lifetime of a page you can export its current state to a standalone `html` file you can
+freely share.
+
+You can export in any of the following ways:
+- Open the options by clicking the options button at the top right and then click **Export**.
+- Open the options by holding `Shift` and typing `A A A` (three consecutive A's) and then click **Export**.
+- Hold `Shift` and type `A A E` (two A's then E).
+
+Note that for the keyboard shortcuts to work, the focus should be on some page content.
+
+### Export function
+
+By default, when you export a page, the result is simply downloaded as a static file.
+
+You can override this default behavior by passing an `export_fn` argument when creating the `Page` instance. e.g:
 
 ```python
+import time
+
 from awe import Page
+
+from utils import save_to_s3  # example import, not something awe comes bundled with
+
+
+def custom_export_fn(index_html):
+    # index_html is the static html content as a string.
+    # You can, for example, save the content to S3.
+    key = 'page-{}.html'.format(time.time()) 
+    save_to_s3(
+        bucket='my_bucket', 
+        key=key, 
+        content=index_html
+    )
+    
+    # Returning a dict from the export_fn function tells awe to skip the default download behavior.
+    # awe will also display a simple key/value table modal built from the dict result.
+    # Returning anything else is expected to be a string that will be downloaded in the browser.
+    # This can be the unmodified index_html, a modified one, a json with statistics, etc...
+    return {'status': 'success', 'key': key}
 
 
 def main():
-    page = Page('Page Properties', width=600, style={
-        'backgroundColor': 'red'
-    })
-    page.new_card('hello')
+    page = Page(export_fn=custom_export_fn)
+    page.new_text('Hello')
     page.start(block=True)
 
 
 if __name__ == '__main__':
     main()
+```
 
- ```
-![image](docs/images/page_properties.png)
+### Offline
 
-### [`standard_output.py`](examples/standard_output.py) 
+You can also generate the page content offline, in python only and export it in code by calling `page.export()`.
 
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/standard_output.html)
+The return value of `export` is the return value of `export_fn` which defaults to the static html content as string.
 
-A page that demonstrates adding text dynamically to a page after it has been started.
-
-The elements are created with a custom style.
- 
-```python
-import time
-
-from awe import Page
-
-
-def main():
-    page = Page()
-    page.start()
-    page.new_text('Header', style={'fontSize': '1.5em', 'color': '#ff0000'})
-    for i in range(20):
-        page.new_text('{} hello {}'.format(i, i), style={'color': 'blue'})
-        time.sleep(2)
-    page.block()
-
-
-if __name__ == '__main__':
-    main()
-
- ```
-![image](docs/images/standard_output.gif)
-
-### [`collapse.py`](examples/collapse.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/collapse.html)
-
-A page with a single collapse element. 
-
-The collapse has 3 panels. The first panel defaults to being expanded. The other two panels default to collapsed.
+e.g:
 
 ```python
 from awe import Page
 
-
 def main():
-    page = Page()
-    collapse = page.new_collapse()
-    panel1 = collapse.new_panel('Panel 1', active=True)
-    panel1.new_text('Hello From Panel 1')
-    panel2 = collapse.new_panel('Panel 2', active=False)
-    panel2.new_text('Hello From Panel2')
-    panel3 = collapse.new_panel('Panel 3')
-    panel3.new_text('Hello From Panel3')
-    page.start(block=True)
-
+    page = Page(offline=True)
+    page.new_text('Hello')
+    print page.export()
+    # you can override the export_fn supplied during creation by passing
+    print page.export(export_fn=lambda index_html: index_html[:100])
+    
 
 if __name__ == '__main__':
     main()
+``` 
 
- ```
-![image](docs/images/collapse.png)
+## Why is it named `awe`?
 
-### [`chart_flat.py`](examples/chart_flat.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.html)
-
-A page with a single chart.
-
-The chart is initialized with a single data item and then updated every 0.7 seconds with a new data item.
-
-The chart has a moving time window of 3 minutes.
-
-The data added to the chart is transformed by the `flat` transformer. It builds charts from the different combinations
-of the `chart_mapping` list. It builds the chart series from the different combinations
-of the `series_mapping` list. The values are extracted from the `value_key` key.
-
-```python
-import time
-import random
-
-from awe import Page
-
-
-def generate_random_data():
-    return [{
-        'color': random.choice(['blue', 'yellow']),
-        'fruit': random.choice(['apple', 'orange']),
-        'temp': random.choice(['cold', 'hot']),
-        'city': random.choice(['Tel Aviv', 'New York']),
-        'value': random.randint(1, 100)
-    }]
-
-
-def main():
-    page = Page()
-    data = generate_random_data()
-    chart = page.new_chart(data=data, transform={
-        'type': 'flat',
-        'chart_mapping': ['color', 'fruit'],
-        'series_mapping': ['temp', 'city'],
-        'value_key': 'value'
-    }, moving_window=3 * 60)
-    page.start()
-    while True:
-        time.sleep(0.7)
-        chart.add(generate_random_data())
-
-
-if __name__ == '__main__':
-    main()
-
- ```
-![image](docs/images/chart_flat.gif)
+I like short names. I initially called this package `pages` but then discovered it is already taken in `pypi`.
+Finding a decent unused name is not an easy task!

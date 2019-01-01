@@ -5,55 +5,38 @@
 
 Dynamic web based reports/dashboards in Python.
 
-## Motivation:
+## What is `awe` for?
 
 `awe` use cases:
 - Create a report for some data you collected in your scripts.
-- Poll some data/state in your script and update a chart displaying that data.
+- Poll some data in your script and update a chart with it.
 - A replacement for print statements in your scripts that can include 
   interactive tables, charts, headers, colors, etc... with minimum fuss.
 
 `awe` isn't for you if you need to:
-- Do web development.
-- Handle a massive amount of data. `awe` is quite wasteful in terms of resources. This works
+- Handle large amounts of data. `awe` is quite wasteful in terms of resources. This works
   well for small-ish amounts of data. On the other hand, charts with many points will
-  probably make your browser completely unresponsive (not benchmarked yet, just a hunch).
+  probably make your browser completely unresponsive.
 
 Under the hood, `awe` generates the page using react.
-
-## Why is it named `awe`?
-
-I like short names. I initially called this package `pages` but then discovered it is already taken in `pypi`.
-Finding a decent unused name is not an easy task!
-
 
 ## Installation
 ```bash
 pip install awe
 ```
 
-## Supported Python Versions
-Tested on Python 2.7.15 and 3.7.1
-
-Should work on many earlier versions I suppose, but haven't been tested so you can't be sure.
-
-These days, I'm mostly working with Python 2.7, so things may unintentionally break on Python 3.
-That being said, the test suite runs on both versions, so changes for that happening are not very high.
-
-Support for Python 3 has been added after initial development, so please open an issue if something
-seems broken under Python 3. In fact, open an issue if something seems broken under any Python version :)
-
 ## Getting Started
 
-The basic idea in `awe` is that you create an `awe.Page()` instance in the beginning of your script. e.g:
+Begin by creating an `awe.Page()` instance. e.g:
 
 ```python
 from awe import Page
 page = Page()
 ```
 
-The page is built by creating a hierarchy of elements. Every element, including the root `Page` element, exposes
-`new_XXX()` methods that create element children.
+A page is built by creating a hierarchy of elements. 
+
+Every element, including the root `Page` element, exposes `new_XXX()` methods that create element children.
 
 These methods can create leaf elements such as `new_text()`, `new_table()`, etc... e.g:
 
@@ -95,6 +78,39 @@ page.start(open_browser=False)
 ```
 
 The [examples](#examples) section can be used as reference for the different elements that can be created with `awe`.
+
+## Examples
+
+{% macro example(name, extension='gif') -%}
+### [{{name}}.py](examples/{{name}}.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/{{name}}.html))
+
+{{ docstring(name) }}
+```python
+{{ load(name) }}
+ ```
+![image](docs/images/{{name}}.{{extension}})
+{% endmacro %}
+
+{{ example('hello_world', 'png') }}
+{{ example('chart_simple') }}
+{{ example('chart_complex') }}
+{{ example('chart_flat') }}
+{{ example('page_properties', 'png') }}
+{{ example('button_and_input') }}
+{{ example('standard_output') }}
+{{ example('collapse', 'png') }}
+{{ example('kitchen') }}
+
+## Supported Python Versions
+Tested on Python 2.7.15 and 3.7.1
+
+Should work on many earlier versions I suppose, but haven't been tested so you can't be sure.
+
+These days, I'm mostly working with Python 2.7, so things may unintentionally break on Python 3.
+That being said, the test suite runs on both versions, so chances of that happening are not very high.
+
+Support for Python 3 has been added after initial development, so please open an issue if something
+seems broken under Python 3. In fact, open an issue if something seems broken under any Python version :)
 
 ## Export To Static HTML
 
@@ -172,26 +188,7 @@ if __name__ == '__main__':
     main()
 ``` 
 
-## Examples
+## Why is it named `awe`?
 
-{% macro example(name, extension='gif') -%}
-### [`{{name}}.py`](examples/{{name}}.py) 
-
-#### [Exported Static Demo](https://s3.amazonaws.com/awe-static-files/examples/{{name}}.html)
-
-{{ docstring(name) }}
-```python
-{{ load(name) }}
- ```
-![image](docs/images/{{name}}.{{extension}})
-{% endmacro %}
-
-{{ example('hello_world', 'png') }}
-{{ example('button_and_input') }}
-{{ example('chart_simple') }}
-{{ example('chart_complex') }}
-{{ example('kitchen') }}
-{{ example('page_properties', 'png') }}
-{{ example('standard_output') }}
-{{ example('collapse', 'png') }}
-{{ example('chart_flat') }}
+I like short names. I initially called this package `pages` but then discovered it is already taken in `pypi`.
+Finding a decent unused name is not an easy task!
