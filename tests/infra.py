@@ -76,4 +76,6 @@ def element_tester(driver, page):
                 current_modifier(page)
             retry()(current_finder)(driver)
 
+        assert not driver.get_log('browser')
+
     return tester
