@@ -72,7 +72,8 @@ def element_tester(driver, page):
         for i in range(0, len(rest), 2):
             current_modifier = rest[i]
             current_finder = rest[i + 1]
-            current_modifier(page)
+            if current_modifier:
+                current_modifier(page)
             retry()(current_finder)(driver)
 
     return tester
