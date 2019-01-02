@@ -24,6 +24,8 @@ class Chart extends Component {
   render() {
     const {chart} = this.props;
     const {data, options, movingWindow} = chart.data;
+    const {props} = chart;
+    delete props.key;
     const charts = [];
     for (const config of Object.values(data)) {
       const {series, title, type} = config;
@@ -68,7 +70,7 @@ class Chart extends Component {
     }
 
     return (
-      <div>
+      <div {...props}>
         {charts.map((chart, i) => (
           <HighchartsReact
             callback={callback}
