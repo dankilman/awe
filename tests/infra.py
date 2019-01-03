@@ -3,6 +3,7 @@ from __future__ import print_function
 import functools
 import os
 import platform
+import pprint
 import tempfile
 import time
 
@@ -31,6 +32,9 @@ def driver():
     result = webdriver.Chrome(options=options)
     result.set_window_size(1600, 1000)
     yield result
+    logs = result.get_log('browser')
+    print('Browser Logs:')
+    pprint.pprint(logs)
     result.close()
 
 
@@ -39,7 +43,7 @@ def page():
     return awe.Page()
 
 
-def retry(attempts=10, interval=1):
+def retry(attempts=5, interval=1):
     def partial(fn):
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
@@ -76,6 +80,10 @@ def element_tester(driver, page):
                 current_modifier(page)
             retry()(current_finder)(driver)
 
-        assert not driver.get_log('browser')
+        logs = driver.get_log('browser')
+        if getattr(builder, 'validate_logs_exist', False):
+            assert logs
+        else:
+            assert not logs
 
     return tester

@@ -62,6 +62,12 @@ class Element(object):
         self._increase_version()
         variable = variables.Variable(value, variable_id)
         self._register(variable)
+        self._dispatch({
+            'type': 'newVariable',
+            'id': variable.id,
+            'value': variable.value,
+            'version': variable.version
+        })
         return variable
 
     def update_data(self, data):
