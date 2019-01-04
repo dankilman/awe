@@ -23,6 +23,183 @@ class Element(object):
             self.props['style'] = style
         self._init_complete = False
 
+    def new_grid(self, columns, **kwargs):
+        """
+        Add a grid child.
+
+        Grid children created with ``new_XXX`` methods can provide an additional ``cols`` argument which defaults to 1.
+        Element flow is left, right, top, down.
+
+        :param columns: Number of columns for the grid.
+        :return: The created grid element.
+        """
+        return self._new_child(Grid, columns=columns, **kwargs)
+
+    def new_tabs(self, **kwargs):
+        """
+        Add a tabs child.
+
+        The only valid ``new_XXX`` method on tabs is ``new_tab``.
+
+        :return: The created tabs element.
+        """
+        return self._new_child(Tabs, **kwargs)
+
+    def new_table(self, headers, page_size=None, **kwargs):
+        """
+        Add a table child.
+
+        :param headers: list of string headers or dict, in which case, it's keys are used.
+        :param page_size: Optionally, enable table pagination by specifying a page size.
+        :return: The created table element.
+        """
+        return self._new_child(Table, headers=headers, page_size=page_size, **kwargs)
+
+    def new_button(self, function, text='', **kwargs):
+        """
+        Add a button child.
+
+        :param function: The python function that should be invoked then the button is clicked.
+        :param text: Option text for the button, the function name is used by default.
+        :return: The created button element.
+        """
+        return self._new_child(Button, function=function, text=text, **kwargs)
+
+    def new_input(self, placeholder=None, on_enter=None, **kwargs):
+        """
+        Add an input child.
+
+        :param placeholder: Optional placeholder text for the input.
+        :param on_enter: Option function to be called when enter is pressed in the input.
+        :return: The created input element.
+        """
+        return self._new_child(Input, placeholder=placeholder, on_enter=on_enter, **kwargs)
+
+    def new_card(self, text='', **kwargs):
+        """
+        Add a card child.
+
+        A card is a small padded box.
+
+        :param text: Optional text for the card. Otherwise, use ``new_XXX`` methods as usual.
+        :return: The created card element.
+        """
+        return self._new_child(Card, text=text, **kwargs)
+
+    def new_text(self, text='', **kwargs):
+        """
+        Add a text child.
+
+        :param text: Optional text, otherwise, interpreted as line break. ``\\n`` will be interpreted correctly.
+        :return: The created text element.
+        """
+        return self._new_child(Text, text=text, **kwargs)
+
+    def new_divider(self, **kwargs):
+        """
+        Add a divider child.
+
+        A divider is a simple horizontal separator.
+
+        :return: The created divider element.
+        """
+        return self._new_child(Divider, **kwargs)
+
+    def new_collapse(self, **kwargs):
+        """
+        Add a collapse child.
+
+        The only valid ``new_XXX`` method on collapse is ``new_panel``.
+
+        :return: The created collapse element.
+        """
+        return self._new_child(Collapse, **kwargs)
+
+    def new_chart(self, data=None, options=None, transform=None, moving_window=None, **kwargs):
+        """
+        Add a chart child.
+
+        :param data: A list of data items.
+        :param options: Optional highcharts options object.
+        :param transform: A transformer for the supplied data which transforms the data into suitable highcharts charts
+                          and series definitions. Can be either a transformer object, a dict with transformer
+                          configuration or a string specifying the transformer name.
+        :param moving_window: Optional moving window size in seconds. If specified, chart will maintain this window
+                              size.
+        :return: The created chart element.
+        """
+        from .chart import Chart
+        return self._new_child(
+            Chart,
+            data=data,
+            options=options,
+            transform=transform,
+            moving_window=moving_window,
+            **kwargs
+        )
+
+    def update_data(self, data):
+        """
+        Update element data.
+
+        Mostly used by element implementations but can be used for some low level updates.
+
+        :param data: The data to update.
+        """
+        self.data.update(data)
+        if not self._init_complete:
+            return
+        self.update_element(path=['data'], action='set', data=self._prepare_data(self.data))
+
+    def update_props(self, props, override=True):
+        """
+        Update element props (underlying react component props).
+
+        Mostly used by element implementations but can be used for some low level updates.
+
+        :param props: The props to update.
+        :param override: Should the supplied props override existing props. (default: ``True``)
+        """
+        final_props = props
+        if not override:
+            final_props = {k: v for k, v in props.items() if k not in self.props}
+        self.props.update(final_props)
+        if not self._init_complete:
+            return
+        self.update_element(path=['props'], action='set', data=self.props)
+
+    def update_prop(self, path, value):
+        """
+        Update a prop inner value.
+
+        Mostly used by element implementations but can be used for some low level updates.
+
+        :param path: The nested path of the prop. If the prop is named ``A`` then reaching ``A.b.c`` would be
+                    ``['A', 'b', 'c']``.
+        :param value: The value to set in the nested prop path.
+        """
+        if isinstance(path, str):
+            path = [path]
+        pydash.set_(self.props, path, value)
+        if not self._init_complete:
+            return
+        self.update_element(path=['props'] + path, action='set', data=value)
+
+    def update_element(self, path, action, data):
+        """
+        Very low level method that dispatches an ``updateElement`` action to the react application running the page.
+        Usually preceded by an internal element data update.
+        """
+        self._dispatch({
+            'type': 'updateElement',
+            'id': self.id,
+            'updateData': {
+                'path': path,
+                'action': action,
+                'data': data
+            }
+        })
+
     def _get_view(self):
         return {
             'id': self.id,
@@ -70,68 +247,6 @@ class Element(object):
         })
         return variable
 
-    def update_data(self, data):
-        """
-        Update element data. Mostly used by element implementations but can be used for some low level updates.
-
-        :param data: The data to update.
-        """
-        self.data.update(data)
-        if not self._init_complete:
-            return
-        self.update_element(path=['data'], action='set', data=self._prepare_data(self.data))
-
-    def update_props(self, props, override=True):
-        """
-        Update element props (underlying react component props).
-        Mostly used by element implementations but can be used for some low level updates.
-
-        :param props: The props to update.
-        :param override: Should the supplied props override existing props (default: True)
-        """
-        final_props = props
-        if not override:
-            final_props = {k: v for k, v in props.items() if k not in self.props}
-        self.props.update(final_props)
-        if not self._init_complete:
-            return
-        self.update_element(path=['props'], action='set', data=self.props)
-
-    def update_prop(self, path, value):
-        """
-        Update a prop inner value.
-        Mostly used by element implementations but can be used for some low level updates.
-
-        :param path: The nested path of the prop. If the prop is named A then reaching A.b.c would be ['A', 'b', 'c']
-        :param value: The value to set in the nested prop path
-        """
-        if isinstance(path, str):
-            path = [path]
-        pydash.set_(self.props, path, value)
-        if not self._init_complete:
-            return
-        self.update_element(path=['props'] + path, action='set', data=value)
-
-    def update_element(self, path, action, data):
-        """
-        Very low level method that dispatches an updateElement action to the react application running the page.
-        Usually preceded by an internal element data update.
-
-        :param path:
-        :param action:
-        :param data:
-        :return:
-        """
-        self._dispatch({
-            'type': 'updateElement',
-            'id': self.id,
-            'updateData': {
-                'path': path,
-                'action': action,
-                'data': data
-            }
-        })
-
     def _init(self, *args, **kwargs):
         pass
 
@@ -146,120 +261,6 @@ class Element(object):
 
     def _increase_version(self):
         self.parent._increase_version()
-
-    def new_grid(self, columns, **kwargs):
-        """
-        Add a grid child.
-
-        Grid children created with new_XXX methods, can provide an additional `cols` argument which defaults to 1.
-        Element flow is left, right, top, down
-
-        :param columns: Number of columns for the grid
-        :return: The created grid element
-        """
-        return self._new_child(Grid, columns=columns, **kwargs)
-
-    def new_tabs(self, **kwargs):
-        """
-        Add a tabs child.
-
-        The only valid new_XXX method on tabs is new_tab
-
-        :return: The created tabs element
-        """
-        return self._new_child(Tabs, **kwargs)
-
-    def new_table(self, headers, page_size=None, **kwargs):
-        """
-        Add a table child.
-
-        :param headers: list of string headers or dict, in which case, it's keys are used.
-        :param page_size: Optionally, enable table pagination by specifying a page size.
-        :return: The created table element
-        """
-        return self._new_child(Table, headers=headers, page_size=page_size, **kwargs)
-
-    def new_button(self, function, text='', **kwargs):
-        """
-        Add a button child.
-
-        :param function: The python function that should be invoked then the button is clicked
-        :param text: Option text for the button, the function name is used by default.
-        :return: The created button element
-        """
-        return self._new_child(Button, function=function, text=text, **kwargs)
-
-    def new_input(self, placeholder=None, on_enter=None, **kwargs):
-        """
-        Add an input child
-
-        :param placeholder: Optional placeholder text for the input
-        :param on_enter: Option function to be called when enter is pressed in the input
-        :return: The created input element
-        """
-        return self._new_child(Input, placeholder=placeholder, on_enter=on_enter, **kwargs)
-
-    def new_card(self, text='', **kwargs):
-        """
-        Add a card child.
-
-        A card is a small padded box.
-
-        :param text: Optional text for the card. Otherwise, use new_XXX methods as usual
-        :return: The created card element
-        """
-        return self._new_child(Card, text=text, **kwargs)
-
-    def new_text(self, text='', **kwargs):
-        """
-        Add a text child.
-
-        :param text: Optional text, otherwise, interpreted as line break. \n will be interpreted correctly.
-        :return: The created text element
-        """
-        return self._new_child(Text, text=text, **kwargs)
-
-    def new_divider(self, **kwargs):
-        """
-        Add a divider child.
-
-        A divider is a simple horizontal separator
-
-        :return: The created divider element
-        """
-        return self._new_child(Divider, **kwargs)
-
-    def new_collapse(self, **kwargs):
-        """
-        Add a collapse child.
-
-        The only valid new_XXX method on collapse is new_panel
-
-        :return: The created collapse element
-        """
-        return self._new_child(Collapse, **kwargs)
-
-    def new_chart(self, data=None, options=None, transform=None, moving_window=None, **kwargs):
-        """
-        Add a chart child.
-
-        :param data: A list of data items
-        :param options: Optional highcharts options object
-        :param transform: A transformer for the supplied data which transforms the data into suitable highcharts charts
-                          and series definitions. Can be either a transformer object, a dict with transformer
-                          configuration or a string specifying the transformer name.
-        :param moving_window: Optional moving window size in seconds. If specified, chart will maintain this window size
-        :return: The created chart element
-        """
-        from .chart import Chart
-        return self._new_child(
-            Chart,
-            data=data,
-            options=options,
-            transform=transform,
-            moving_window=moving_window,
-            **kwargs
-        )
 
 
 class Grid(Element):
@@ -290,11 +291,11 @@ class Collapse(Element):
 
     def new_panel(self, header, active=False, **kwargs):
         """
-        Add a panel child
+        Add a panel child.
 
-        :param header: The text to display as the panel header
-        :param active: Should this panel be collapsed or expanded by default (default: False)
-        :return: The created panel element
+        :param header: The text to display as the panel header.
+        :param active: Should this panel be collapsed or expanded by default. (default: False)
+        :return: The created panel element.
         """
 
         result = self._new_child(Panel, header=header, **kwargs)
@@ -319,10 +320,20 @@ class Text(Element):
 
     @property
     def text(self):
+        """
+        Get the text value.
+
+        :return: The new text.
+        """
         return self.data['text']
 
     @text.setter
     def text(self, value):
+        """
+        Set the text value.
+
+        :param value: The new text.
+        """
         self.update_data({'text': value or ''})
 
 
@@ -345,7 +356,7 @@ class Table(Element):
 
     def clear(self):
         """
-        Clear all table rows
+        Clear all table rows.
         """
         if not self.data['rows']:
             return
@@ -354,32 +365,34 @@ class Table(Element):
 
     def set(self, rows):
         """
-        Override existing table rows with new rows
-        :param rows: The rows to set
+        Override existing table rows with new rows.
+
+        :param rows: The rows to set.
         """
         self.data['rows'] = deque([self._row_data(r, i) for i, r in enumerate(rows)])
         self.update_data(self.data)
 
     def append(self, row):
         """
-        Append a row
-        :param row: The row to append
+        Append a row.
+
+        :param row: The row to append.
         """
         self._add_row(row, 'append')
 
     def prepend(self, row):
         """
-        Prepend a row
+        Prepend a row.
 
-        :param row: The row to prepend
+        :param row: The row to prepend.
         """
         self._add_row(row, 'prepend')
 
     def extend(self, rows):
         """
-        Append several rows in one call
+        Append several rows in one call.
 
-        :param rows: The rows to append
+        :param rows: The rows to append.
         """
         rows_data = [self._row_data(r, i) for i, r in enumerate(rows)]
         self.data['rows'].extend(rows_data)
@@ -414,10 +427,20 @@ class Button(Element):
 
     @property
     def text(self):
+        """
+        Get the button text.
+
+        :return: The button text value.
+        """
         return self.data['text']
 
     @text.setter
     def text(self, value):
+        """
+        Set the button text.
+
+        :param value: The new text.
+        """
         self.update_data({'text': value})
 
 
@@ -447,8 +470,8 @@ class Tabs(Element):
         """
         Add a tab child.
 
-        :param name: The name of the tab
-        :return: The created tab element
+        :param name: The name of the tab.
+        :return: The created tab element.
         """
         return self._new_child(Tab, name=name, **kwargs)
 

@@ -40,3 +40,6 @@ export-examples:
 
 publish-examples:
 	tools/publish-examples.sh
+
+build-docs:
+	cd docs && sphinx-build source build

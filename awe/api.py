@@ -11,6 +11,8 @@ from . import export
 
 page = None
 
+DEFAULT_WIDTH = 1200
+
 
 class Page(view.Element):
 
@@ -18,11 +20,18 @@ class Page(view.Element):
             self,
             title='Awe',
             port=8080,
-            ws_port=9000,
             width=None,
             style=None,
             export_fn=None,
             offline=False):
+        """
+        :param title: Page title.
+        :param port: Webserver port.
+        :param width: Set the page content width. (defaults to ``1200px``)
+        :param style: Set custom javascript style object.
+        :param export_fn: Override default export function.
+        :param offline: Offline mode means start/block don't do anything. Useful when exporting directly from python.
+        """
         super(Page, self).__init__(parent=None, element_id='', props=None, style=None)
         self._offline = (offline or os.environ.get('AWE_OFFLINE'))
         self._port = port
@@ -36,7 +45,7 @@ class Page(view.Element):
         self._server = webserver.WebServer(
             exporter=self._exporter,
             port=port)
-        self._ws_server = websocket.WebSocketServer(self._message_handler, port=ws_port)
+        self._ws_server = websocket.WebSocketServer(self._message_handler)
         self._started = False
         self._version = 0
         self._closed = False
@@ -46,11 +55,12 @@ class Page(view.Element):
 
     def start(self, block=False, open_browser=True, develop=False):
         """
-        Start the page services
+        Start the page services.
 
-        :param block: Should the method invocation block (default: False)
-        :param open_browser: Should a new tab be opened in a browser pointing to the started page (default: True)
-        :param develop: During development, changes to port for open browser to 3000 (due to npm start, default False)
+        :param block: Should the method invocation block. (default: ``False``)
+        :param open_browser: Should a new tab be opened in a browser pointing to the started page. (default: ``True``)
+        :param develop: During development, changes to port for open browser to ``3000``.
+               (due to npm start, default ``False``)
         """
         if self._offline:
             return
@@ -66,16 +76,16 @@ class Page(view.Element):
 
     def export(self, export_fn=None):
         """
-        Export current page state into a static html
+        Export current page state into a static html.
 
-        :param export_fn: Override the export_fn supplied during page creation (if any)
-        :return: The exporter result
+        :param export_fn: Override the export_fn supplied during page creation. (if any)
+        :return: The exporter result.
         """
         return self._exporter.export(export_fn)
 
     def block(self):
         """
-        Utility method to block after page has been started
+        Utility method to block after page has been started.
         """
         if self._offline:
             return
@@ -116,7 +126,7 @@ class Page(view.Element):
     def _set_default_style(style, width):
         style = style or {}
         defaults = {
-            'width': width or 1200,
+            'width': width or DEFAULT_WIDTH,
             'paddingTop': '6px',
             'paddingBottom': '6px'
         }
