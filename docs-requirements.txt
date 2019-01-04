@@ -1,0 +1,7 @@
+six
+bottle
+autobahn[twisted]
+twisted
+txaio
+pydash
+typing
