@@ -593,3 +593,7 @@ if __name__ == '__main__':
 
 I like short names. I initially called this package `pages` but then discovered it is already taken in `pypi`.
 Finding a decent unused name is not an easy task!
+
+## Credits
+
+See [Credits](CREDITS.md).
