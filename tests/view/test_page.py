@@ -1,64 +1,52 @@
-import os
-
-import pytest
-
 from awe import Page
 
 from ..infra import driver, retry
 
 
-skip_if_ci = pytest.mark.skipif('os.environ.get("CI")', reason='Sporadic unexplained failures')
-
-
-@skip_if_ci
 def test_page_basic(driver):
-    _page(driver, Page())
-
-    @retry()
+    @_retry(driver)
     def check_page():
         assert driver.title == 'Awe'
-
     check_page()
 
 
-@skip_if_ci
 def test_page_title(driver):
     title = 'A Custom Page Title'
-    _page(driver, Page(title=title))
 
-    @retry()
+    @_retry(driver, title=title)
     def check_page():
         assert driver.title == title
-
     check_page()
 
 
-@skip_if_ci
 def test_page_width(driver):
     width = 555
-    _page(driver, Page(width=width))
 
-    @retry()
+    @_retry(driver, width=width)
     def check_page():
         root = driver.find_element_by_id('root')
         assert root.size['width'] == width
-
     check_page()
 
 
-@skip_if_ci
 def test_page_style(driver):
     width = 545
-    _page(driver, Page(style={'width': width}))
 
-    @retry()
+    @_retry(driver, style={'width': width})
     def check_page():
         root = driver.find_element_by_id('root')
         assert root.size['width'] == width
-
     check_page()
 
 
-def _page(driver, page):
-    page.start(open_browser=False)
-    driver.get('http://localhost:{}'.format(page._port))
+def _retry(driver, **page_kwargs):
+    def wrapper(fn):
+        page = Page(**page_kwargs)
+        page.start(open_browser=False)
+
+        @retry()
+        def result():
+            driver.get('http://localhost:{}'.format(page._port))
+            fn()
+        return result
+    return wrapper
