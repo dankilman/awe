@@ -20,6 +20,7 @@ examples = {
     'chart_complex': {
         'terminate_after': 70,
     },
+    'showcase': {},
     'kitchen': {
         'terminate_after': 60,
     },

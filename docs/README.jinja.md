@@ -102,6 +102,7 @@ The [examples](#examples) section can be used as reference for the different ele
 {{ example('button_and_input') }}
 {{ example('standard_output') }}
 {{ example('collapse', 'png') }}
+{{ example('showcase', 'png') }}
 {{ example('kitchen') }}
 
 ## Supported Python Versions
