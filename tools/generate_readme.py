@@ -18,7 +18,7 @@ def load_example_docstring(name):
 
 
 def main():
-    with open(path.join(basedir, 'README.jinja.md')) as f:
+    with open(path.join(basedir, 'docs', 'README.jinja.md')) as f:
         template_content = f.read()
     template = Template(template_content)
     with open(path.join(basedir, 'README.md'), 'w') as f:
