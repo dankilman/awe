@@ -3,7 +3,8 @@ import time
 from .view import Element
 
 number_types = (int, float)
-now_ms = (lambda: int(time.time() * 1000))
+to_ms = (lambda s: int(s * 1000))
+now_ms = (lambda: to_ms(time.time()))
 
 
 class Transformer(object):
@@ -55,7 +56,7 @@ class NumberSequenceTransformer(Transformer):
     """
     A numbers transformer.
 
-    Assumes each item in data if a single number or a list of numbers.
+    Assumes each item in data is a single number or a list of numbers.
 
     If a list of numbers is supplied, each number in the list is assumed to belong to a different series.
 
@@ -68,6 +69,9 @@ class NumberSequenceTransformer(Transformer):
         now = now_ms()
         series_dict = {}
         for item in data:
+            if isinstance(item, tuple) and len(item) == 2:
+                now, item = item
+                now = to_ms(now)
             if isinstance(item, number_types):
                 item = [item]
             for index, value in enumerate(item):
@@ -105,6 +109,9 @@ class FlatDictTransformer(Transformer):
         result = {}
         chart_dict = {}
         for item in data:
+            if isinstance(item, tuple) and len(item) == 2:
+                now, item = item
+                now = to_ms(now)
             chart_key = ' '.join(item[k] for k in self._chart_mapping)
             series_key = ' '.join(item[k] for k in self._series_mapping)
             value = item[self._value_key]
@@ -163,6 +170,9 @@ class DictLevelsTransformer(Transformer):
         result = {}
         chart_dict = {}
         for item in data:
+            if isinstance(item, tuple) and len(item) == 2:
+                now, item = item
+                now = to_ms(now)
             for path, value in self._iterate_paths(item, []):
                 self._process_path(chart_dict, now, path, value)
         for chart_key, series in chart_dict.items():
@@ -222,7 +232,10 @@ class Chart(Element):
         """
         Add new data to a chart after it has been created.
 
-        :param data: A list of data items.
+        :param data: A list of data items. Each data item is expected to match the format the transformer expects.
+                     A data item may also be supplied in the form of a 2-tuple (time, data),
+                     in which case, the first item is the epoch time in seconds with ms precision and
+                     the second item is the data item itself.
         """
         transformed_data = self.transformer.add(self.data['data'], data)
         self.update_element(

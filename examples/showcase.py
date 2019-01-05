@@ -1,14 +1,17 @@
+import time
+
 from awe import Page
 
 
 def main():
+    now = time.time()
     page = Page('Showcase')
     grid = page.new_grid(columns=3, props={'gutter': 12})
     grid.new_card('Card 1')
     card = grid.new_card()
     tabs = grid.new_tabs()
     collapse = grid.new_collapse()
-    grid.new_chart([[1]], transform='numbers')
+    grid.new_chart([(now+i, -i) for i in range(100)], transform='numbers')
     grid.new_table(['Header 1', 'Header 2', 'Header 3'], page_size=4).extend([
         ['Value {}'.format(i), 'Value {}'.format(i+1), 'Value {}'.format(i+2)]
         for i in range(1, 20, 3)

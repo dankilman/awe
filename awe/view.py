@@ -119,7 +119,10 @@ class Element(object):
         """
         Add a chart child.
 
-        :param data: A list of data items.
+        :param data: A list of data items. Each data item is expected to match the format the transformer expects.
+                     A data item may also be supplied in the form of a 2-tuple (time, data),
+                     in which case, the first item is the epoch time in seconds with ms precision and
+                     the second item is the data item itself.
         :param options: Optional highcharts options object.
         :param transform: A transformer for the supplied data which transforms the data into suitable highcharts charts
                           and series definitions. Can be either a transformer object, a dict with transformer
