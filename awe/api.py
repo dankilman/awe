@@ -113,6 +113,9 @@ class Page(view.Element):
     def _register(self, obj, obj_id=None):
         self._registry.register(obj, obj_id)
 
+    def _unregister(self, obj, obj_id=None):
+        self._registry.unregister(obj, obj_id)
+
     def _dispatch(self, action, client_id=None):
         if self._closed:
             raise RuntimeError('page is closed')

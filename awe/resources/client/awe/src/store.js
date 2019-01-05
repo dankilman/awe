@@ -92,6 +92,15 @@ function newElement(state, {id, index, data, parentId, elementType, props = {}})
   return state.setIn(['elements', id], fromJS({index, id, parentId, data, elementType, props, children: []}));
 }
 
+function removeElements(state, {ids}) {
+  return state.withMutations(map => {
+    for (const id of ids) {
+      map = map.removeIn(['elements', id])
+    }
+    return map;
+  });
+}
+
 function newVariable(state, {id, value, version}) {
   return state.setIn(['variables', id], fromJS({id, value, version}));
 }
@@ -140,6 +149,7 @@ function displayExportObjectResult(state, {displayExportObjectResult}) {
 const reducers = {
   processInitialState,
   newElement,
+  removeElements,
   newVariable,
   updateElement: updatePath('elements'),
   updateVariable,

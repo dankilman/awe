@@ -82,7 +82,7 @@ def test_update_props():
     assert element.props == {'key1': 'new_value1', 'key2': 'value2', 'key': element.id, 'key3': 'value3'}
 
 
-def test_update_prod():
+def test_update_prop():
     page = Page()
 
     class TestElement(view.Element):
@@ -101,3 +101,62 @@ def test_update_prod():
     assert element.props['one']['two']['three'] == 5
     element.update_prop('a', 'other value')
     assert element.props['a'] == 'other value'
+
+
+def test_remove():
+    page = Page()
+    t1 = page.new_text('t1')
+    c1 = page.new_card()
+    t2 = c1.new_text('t2')
+    t3 = c1.new_text('t3')
+    i1 = page.new_input(id='i1')
+    i2_on_enter = lambda: None
+    i2 = page.new_input(on_enter=i2_on_enter, id='i2')
+    b1_fn = lambda: None
+    b1 = page.new_button(b1_fn, id='b1')
+    registry = page._registry
+
+    assert not any(e._removed for e in [t1, c1, t2, t3, i1, i2, b1])
+    assert {c.id for c in page.children} == {t1.id, c1.id, i1.id, i2.id, b1.id}
+    assert registry.elements == {t.id: t for t in [t1, c1, t2, t3, i1, i2, b1]}
+    assert registry.functions == {'i2': i2_on_enter, 'b1': b1_fn}
+    assert registry.variables == {'i1': i1._variable, 'i2': i2._variable}
+
+    assert t1 in page.children
+    assert not t1._removed
+    ids = t1.remove()
+    assert ids == [t1.id]
+    assert registry.elements == {t.id: t for t in [c1, t2, t3, i1, i2, b1]}
+    assert t1 not in page.children
+    assert t1._removed
+
+    ids = c1.remove()
+    assert set(ids) == {c1.id, t2.id, t3.id}
+    assert c1 not in page.children
+    assert c1._removed
+    assert t2._removed
+    assert t3._removed
+    assert registry.elements == {t.id: t for t in [i1, i2, b1]}
+
+    ids = page.remove(i1)
+    assert ids == [i1.id]
+    assert i1._removed
+    assert i1 not in page.children
+    assert registry.elements == {t.id: t for t in [i2, b1]}
+    assert registry.variables == {'i2': i2._variable}
+
+    ids = i2.remove()
+    assert ids == [i2.id]
+    assert i2._removed
+    assert i2 not in page.children
+    assert registry.elements == {t.id: t for t in [b1]}
+    assert registry.variables == {}
+    assert registry.functions == {'b1': b1_fn}
+
+    ids = b1.remove()
+    assert ids == [b1.id]
+    assert b1._removed
+    assert not page.children
+    assert not registry.elements
+    assert not registry.variables
+    assert not registry.functions

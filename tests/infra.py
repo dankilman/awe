@@ -51,7 +51,7 @@ def retry(attempts=5, interval=1):
                 print('Attempt {}'.format(i+1))
                 try:
                     return fn(*args, **kwargs)
-                except Exception:
+                except BaseException:
                     if i >= attempts - 1:
                         raise
                     time.sleep(interval)

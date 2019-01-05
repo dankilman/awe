@@ -22,6 +22,7 @@ class Element(object):
         if style:
             self.props['style'] = style
         self._init_complete = False
+        self._removed = False
 
     def new_grid(self, columns, **kwargs):
         """
@@ -141,6 +142,17 @@ class Element(object):
             **kwargs
         )
 
+    def remove(self, element=None):
+        """
+        Remove an element from the page.
+
+        :param element: If supplied, remove the supplied element, otherwise, remove self.
+        """
+        element = element or self
+        parent = element.parent
+        assert parent
+        return parent._remove_child(element)
+
     def update_data(self, data):
         """
         Update element data.
@@ -193,6 +205,7 @@ class Element(object):
         Very low level method that dispatches an ``updateElement`` action to the react application running the page.
         Usually preceded by an internal element data update.
         """
+        assert not self._removed
         self._dispatch({
             'type': 'updateElement',
             'id': self.id,
@@ -226,6 +239,7 @@ class Element(object):
 
     def _new_child(self, cls, **kwargs):
         assert self.allow_children
+        assert not self._removed
         self._increase_version()
         props = kwargs.pop('props', None)
         style = kwargs.pop('style', None)
@@ -238,7 +252,21 @@ class Element(object):
         self._dispatch(result._get_new_element_action())
         return result
 
+    def _remove_child(self, element):
+        if element._removed:
+            return
+        assert not self._removed
+        ids = element._remove()
+        self._increase_version()
+        self.children.remove(element)
+        self._dispatch({
+            'type': 'removeElements',
+            'ids': ids
+        })
+        return ids
+
     def _new_variable(self, value, variable_id=None):
+        assert not self._removed
         self._increase_version()
         variable = variables.Variable(value, variable_id)
         self._register(variable)
@@ -253,11 +281,22 @@ class Element(object):
     def _init(self, *args, **kwargs):
         pass
 
+    def _remove(self):
+        ids = [self.id]
+        for child in self.children:
+            ids.extend(child._remove())
+        self._unregister(self)
+        self._removed = True
+        return ids
+
     def _prepare_data(self, data):
         return data
 
     def _register(self, obj, obj_id=None):
         self.parent._register(obj, obj_id)
+
+    def _unregister(self, obj, obj_id=None):
+        self.parent._unregister(obj, obj_id)
 
     def _dispatch(self, action):
         self.parent._dispatch(action)
@@ -425,8 +464,13 @@ class Button(Element):
     allow_children = False
 
     def _init(self, function, text):
+        self._function = function
         self._register(function, self.id)
         self.update_data({'text': text or function.__name__})
+
+    def _remove(self):
+        self._unregister(self._function, self.id)
+        return super(Button, self)._remove()
 
     @property
     def text(self):
@@ -452,12 +496,19 @@ class Input(Element):
     allow_children = False
 
     def _init(self, placeholder, on_enter):
-        self._new_variable('', self.id)
+        self._on_enter = on_enter
+        self._variable = self._new_variable('', self.id)
         if placeholder:
             self.update_props({'placeholder': placeholder}, override=False)
         if on_enter:
             self.update_data({'enter': True})
             self._register(on_enter, self.id)
+
+    def _remove(self):
+        self._unregister(self._variable, self.id)
+        if self._on_enter:
+            self._unregister(self._on_enter, self.id)
+        return super(Input, self)._remove()
 
 
 class Tabs(Element):

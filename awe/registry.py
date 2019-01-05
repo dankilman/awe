@@ -10,15 +10,24 @@ class Registry(object):
         self.variables = {}
 
     def register(self, obj, obj_id=None):
-        obj_id = obj_id or getattr(obj, 'id', str(id(obj)))
-        if isinstance(obj, view.Element):
-            self.elements[obj_id] = obj
-        elif isinstance(obj, variables.Variable):
-            self.variables[obj_id] = obj
-        elif callable(obj):
-            self.functions[obj_id] = obj
-        else:
-            raise RuntimeError('No registry is defined for objects of type'.format(type(obj).__name__))
+        obj_id, store = self._get_id_and_store(obj, obj_id)
+        store[obj_id] = obj
+
+    def unregister(self, obj, obj_id=None):
+        obj_id, store = self._get_id_and_store(obj, obj_id)
+        del store[obj_id]
 
     def get_variables(self):
         return {k: var.get_variable() for k, var in self.variables.items()}
+
+    def _get_id_and_store(self, obj, obj_id):
+        obj_id = obj_id or getattr(obj, 'id', str(id(obj)))
+        if isinstance(obj, view.Element):
+            store = self.elements
+        elif isinstance(obj, variables.Variable):
+            store = self.variables
+        elif callable(obj):
+            store = self.functions
+        else:
+            raise RuntimeError('No registry is defined for objects of type'.format(type(obj).__name__))
+        return obj_id, store
