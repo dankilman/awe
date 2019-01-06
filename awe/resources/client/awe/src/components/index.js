@@ -5,7 +5,9 @@ import Tabs from 'antd/lib/tabs';
 import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
 import Collapse from 'antd/lib/collapse';
+import Icon from 'antd/lib/icon';
 import Table from './Table';
+import Inline from './Inline';
 import Grid from './Grid';
 import Text from './Text'
 import Chart from './Chart';
@@ -95,6 +97,17 @@ const connectedComponents = {
       chart={chart}
     />
   ),
+  Icon: icon => (
+    <Icon
+      {...icon.props}
+    />
+  ),
+  Inline: inline => (
+    <Inline
+      {...inline.props}
+      inline={inline}
+    />
+  )
 };
 
 const components = Object.assign({}, nativeComponents, connectedComponents);

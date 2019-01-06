@@ -4,6 +4,10 @@ class Text extends Component {
   render() {
     const {data, props} = this.props.text;
     const {text} = data;
+    if (!text) {
+      delete props.key;
+      return (<br {...props}/>);
+    }
     const lines = (text || '').split('\n');
     return (
       <div>

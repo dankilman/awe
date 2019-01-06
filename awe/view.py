@@ -56,15 +56,33 @@ class Element(object):
         """
         return self._new_child(Table, headers=headers, page_size=page_size, **kwargs)
 
-    def new_button(self, function, text='', **kwargs):
+    def new_button(self, function, text='', icon=None, shape=None, type='default', block=False, **kwargs):
         """
         Add a button child.
 
+        Most properties here are passed as is to the underlying ant-design button component, so refer
+        to its documentation for more information.
+
+        https://ant.design/components/button
+
         :param function: The python function that should be invoked then the button is clicked.
-        :param text: Option text for the button, the function name is used by default.
+        :param text: Option text for the button, the function name is used by default (unless shape is supplied).
+        :param icon: See ant design icon documentation.
+        :param type: Any of: ``default`` (which is the default), ``primary``, ``ghost``, ``dashed``, ``danger``.
+        :param shape: Optionally pass ``circle`` for a circle shaped button.
+        :param block: Pass ``True`` to make the button fit the full width of its parent element.
         :return: The created button element.
         """
-        return self._new_child(Button, function=function, text=text, **kwargs)
+        return self._new_child(
+            Button,
+            function=function,
+            text=text,
+            icon=icon,
+            shape=shape,
+            type=type,
+            block=block,
+            **kwargs
+        )
 
     def new_input(self, placeholder=None, on_enter=None, **kwargs):
         """
@@ -141,6 +159,35 @@ class Element(object):
             moving_window=moving_window,
             **kwargs
         )
+
+    def new_icon(self, type, theme='outlined', spin=False, two_tone_color=None, **kwargs):
+        """
+        Add a new icon element.
+
+        Most properties here are passed as is to the underlying ant-design icon component, so refer
+        to its documentation for more information.
+
+        https://ant.design/components/icon
+
+        :param type: The icon type. See ant design icon documentation.
+        :param theme: Any of: ``outlined`` (the default), ``filled``, ``twoTone``
+        :param spin: Pass ``True`` to make the icon spin.
+        :param two_tone_color: When theme is ``twoTone``, a CSS style color for the main color of the icon.
+        :return: The created icon element.
+        """
+        return self._new_child(Icon, type=type, theme=theme, spin=spin, two_tone_color=two_tone_color, **kwargs)
+
+    def new_inline(self, text='', **kwargs):
+        """
+        Add a new inline element.
+
+        Useful in combination with icons. As opposed to ``new_text``, ``new_inline`` doesn't take up a full line
+        when added (a span is used internally).
+
+        :param text: Optional text for the inline. Inline can also be a container element.
+        :return: The created inline element.
+        """
+        return self._new_child(Inline, text=text, **kwargs)
 
     def remove(self, element=None):
         """
@@ -463,10 +510,18 @@ class Button(Element):
 
     allow_children = False
 
-    def _init(self, function, text):
+    def _init(self, function, text, icon, shape, type, block):
+        assert (not shape) or shape == 'circle'
         self._function = function
         self._register(function, self.id)
-        self.update_data({'text': text or function.__name__})
+        self.update_props({
+            'icon': icon,
+            'shape': shape,
+            'type': type,
+            'block': block
+        }, override=False)
+        text = text or ('' if shape else function.__name__)
+        self.update_data({'text': text})
 
     def _remove(self):
         self._unregister(self._function, self.id)
@@ -534,3 +589,20 @@ class Tab(Element):
 
     def _init(self, name):
         self.update_props({'tab': name}, override=False)
+
+
+class Icon(Element):
+
+    def _init(self, type, theme, spin, two_tone_color):
+        assert theme in ['outlined', 'filled', 'twoTone']
+        assert (not two_tone_color) or theme == 'twoTone'
+        self.update_props({
+            'type': type,
+            'theme': theme,
+            'spin': spin,
+            'twoToneColor': two_tone_color
+        }, override=False)
+
+
+class Inline(Text):
+    allow_children = True

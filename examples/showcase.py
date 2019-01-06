@@ -17,8 +17,10 @@ def main():
         for i in range(1, 20, 3)
     ])
     grid.new_divider()
-    grid.new_button(lambda: None, 'Button 1')
+    grid.new_button(lambda: None, 'Button 1', block=True)
     grid.new_input()
+    grid.new_icon('heart', theme='twoTone', two_tone_color='red')
+    inline = grid.new_inline()
     card.new_text('Card Text 1')
     card.new_text('Card Text 2')
     tabs.new_tab('Tab 1').new_text('Tab 1 Text')
@@ -30,6 +32,9 @@ def main():
     collapse.new_panel('Panel 3').new_text('Panel 3 Text')
     collapse.new_panel('Panel 4').new_text('Panel 4 Text')
     collapse.new_panel('Panel 5').new_text('Panel 5 Text')
+    inline.new_inline('inline 1')
+    inline.new_inline('inline 2')
+    inline.new_inline('inline 3')
     page.start(True)
 
 
