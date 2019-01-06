@@ -32,7 +32,7 @@ class Page(view.Element):
         :param export_fn: Override default export function.
         :param offline: Offline mode means start/block don't do anything. Useful when exporting directly from python.
         """
-        super(Page, self).__init__(parent=None, element_id='', props=None, style=None)
+        super(Page, self).__init__(root_id='root', parent=None, element_id='', props=None, style=None)
         self._offline = (offline or os.environ.get('AWE_OFFLINE'))
         self._port = port
         self._title = title

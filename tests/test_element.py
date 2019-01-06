@@ -24,6 +24,7 @@ def test_base():
             self.arg1 = arg1
             self.arg2 = arg2
 
+    assert page.root_id == 'root'
     assert page.index == 0
     assert page._version == 0
 
@@ -33,7 +34,11 @@ def test_base():
     test_element3 = page._new_child(TestElement, id=test_id)
     test_element4 = test_element3._new_child(TestElement4, arg1='val1', arg2='val2')
 
-    assert page._registry.elements == {t.id: t for t in [test_element, test_element2, test_element3, test_element4]}
+    all_elements = [test_element, test_element2, test_element3, test_element4]
+    for element in all_elements:
+        assert element.root_id == 'root'
+
+    assert page._registry.elements == {t.id: t for t in all_elements}
 
     assert page.children == [test_element, test_element2, test_element3]
 
@@ -103,6 +108,28 @@ def test_update_prop():
     assert element.props['a'] == 'other value'
 
 
+def test_new_prop():
+    page = Page()
+
+    class TestElement(view.Element):
+        pass
+
+    element = page._new_child(TestElement)
+    element.update_prop('other_prop', 'value')
+    prop1 = element.new_prop('prop1')
+    text1 = prop1.new_text('text1')
+    card1 = prop1.new_card('card1')
+
+    with pytest.raises(AssertionError):
+        element.new_prop('prop1')
+    with pytest.raises(AssertionError):
+        element.new_prop('other_prop')
+
+    assert element._prop_children == {'prop1': prop1}
+    assert prop1.id == str(id(prop1))
+    assert prop1.children == [text1, card1]
+
+
 def test_remove():
     page = Page()
     t1 = page.new_text('t1')
@@ -122,16 +149,19 @@ def test_remove():
     assert registry.functions == {'i2': i2_on_enter, 'b1': b1_fn}
     assert registry.variables == {'i1': i1._variable, 'i2': i2._variable}
 
+    def entries(li):
+        return [{'type': 'element', 'id': i, 'rootId': 'root'} for i in li]
+
     assert t1 in page.children
     assert not t1._removed
     ids = t1.remove()
-    assert ids == [t1.id]
+    assert ids == entries([t1.id])
     assert registry.elements == {t.id: t for t in [c1, t2, t3, i1, i2, b1]}
     assert t1 not in page.children
     assert t1._removed
 
     ids = c1.remove()
-    assert set(ids) == {c1.id, t2.id, t3.id}
+    assert set(e['id'] for e in ids) == {c1.id, t2.id, t3.id}
     assert c1 not in page.children
     assert c1._removed
     assert t2._removed
@@ -139,14 +169,14 @@ def test_remove():
     assert registry.elements == {t.id: t for t in [i1, i2, b1]}
 
     ids = page.remove(i1)
-    assert ids == [i1.id]
+    assert ids == entries([i1.id]) + [{'type': 'variable', 'id': i1.id}]
     assert i1._removed
     assert i1 not in page.children
     assert registry.elements == {t.id: t for t in [i2, b1]}
     assert registry.variables == {'i2': i2._variable}
 
     ids = i2.remove()
-    assert ids == [i2.id]
+    assert ids == entries([i2.id]) + [{'type': 'variable', 'id': i2.id}]
     assert i2._removed
     assert i2 not in page.children
     assert registry.elements == {t.id: t for t in [b1]}
@@ -154,9 +184,31 @@ def test_remove():
     assert registry.functions == {'b1': b1_fn}
 
     ids = b1.remove()
-    assert ids == [b1.id]
+    assert ids == entries([b1.id])
     assert b1._removed
     assert not page.children
     assert not registry.elements
     assert not registry.variables
     assert not registry.functions
+
+
+def test_remove_with_prop_elements():
+    page = Page()
+    text1 = page.new_text()
+    prop1 = text1.new_prop('prop1')
+    prop2 = text1.new_prop('prop2')
+    text11 = prop1.new_text()
+    text12 = prop1.new_text()
+    text21 = prop2.new_text()
+    text22 = prop2.new_text()
+    removed = text1.remove()
+
+    def prop_removal(root, element1, element2):
+        return [
+            {'type': 'element', 'id': element1.id, 'rootId': root.id},
+            {'type': 'element', 'id': element2.id, 'rootId': root.id},
+            {'type': 'root', 'id': root.id},
+        ]
+    text_removal = [{'type': 'element', 'id': text1.id, 'rootId': 'root'}]
+    assert ((removed == text_removal + prop_removal(prop1, text11, text12) + prop_removal(prop2, text21, text22)) or
+            (removed == text_removal + prop_removal(prop2, text21, text22) + prop_removal(prop1, text11, text12)))

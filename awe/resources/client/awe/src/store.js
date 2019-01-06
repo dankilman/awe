@@ -2,7 +2,7 @@ import {fromJS} from 'immutable';
 import {createStore} from 'redux';
 
 const initialState = fromJS({
-  elements: {},
+  roots: {root: {}},
   variables: {},
   style: {},
   displayError: false,
@@ -63,13 +63,22 @@ const updateElementActions = {
   addChartData
 };
 
-function processElement(map, element) {
-  const {children, id} = element;
+function processElement(map, element, rootId) {
+  const {children, id, propChildren} = element;
+  const newPropChildren = {};
+  for (const [prop, {id: propChildRootId, children}] of Object.entries(propChildren)) {
+    for (const child of children) {
+      newPropChildren[prop] = propChildRootId;
+      map = processElement(map, child, propChildRootId);
+    }
+  }
+  element.propChildren = newPropChildren;
+  element.rootId = rootId;
   map = newElement(map, element);
   if (children) {
     for (const child of children) {
       child.parentId = id;
-      map = processElement(map, child);
+      map = processElement(map, child, rootId);
     }
   }
   return map;
@@ -82,20 +91,31 @@ function processInitialState(state, {style, variables, children}) {
       map = newVariable(map, variable)
     }
     for (const child of children) {
-      map = processElement(map, child);
+      map = processElement(map, child, 'root');
     }
     return map;
   });
 }
 
-function newElement(state, {id, index, data, parentId, elementType, props = {}}) {
-  return state.setIn(['elements', id], fromJS({index, id, parentId, data, elementType, props, children: []}));
+function newPropChild(state, {id, prop, elementRootId, elementId}) {
+  return state.setIn(['roots', elementRootId, elementId, 'propChildren', prop], id);
 }
 
-function removeElements(state, {ids}) {
+function newElement(state, {id, rootId, index, data, parentId, elementType, props = {}, propChildren = {}}) {
+  return state.setIn(['roots', rootId, id], fromJS({index, id, parentId, data, elementType, props, children: [], propChildren}));
+}
+
+function removeElements(state, {entries}) {
   return state.withMutations(map => {
-    for (const id of ids) {
-      map = map.removeIn(['elements', id])
+    for (const entry of entries) {
+      if (entry.type === 'element') {
+        map = map.removeIn(['roots', entry.rootId, entry.id])
+      } else if (entry.type === 'root') {
+        map = map.removeIn(['roots', entry.id])
+      } else if (entry.type === 'variable') {
+        map = map.removeIn(['variables', entry.id])
+      }
+
     }
     return map;
   });
@@ -118,15 +138,13 @@ function updateVariable(state, {id, value, version = -1}) {
   return state.mergeIn(['variables', id], fromJS(update));
 }
 
-function updatePath(prefix) {
-  return (state, {id, updateData}) => {
-    const {path = [], action, data} = updateData;
-    const fullPath = [prefix, id].concat(path);
-    if (action === 'set') {
-      return state.setIn(fullPath, fromJS(data));
-    } else {
-      return state.updateIn(fullPath, updateElementActions[action](fromJS(data)));
-    }
+function updatePath(state, {id, rootId, updateData}){
+  const {path, action, data} = updateData;
+  const finalPath = ['roots', rootId, id].concat(path);
+  if (action === 'set') {
+    return state.setIn(finalPath, fromJS(data));
+  } else {
+    return state.updateIn(finalPath, updateElementActions[action](fromJS(data)));
   }
 }
 
@@ -149,9 +167,10 @@ function displayExportObjectResult(state, {displayExportObjectResult}) {
 const reducers = {
   processInitialState,
   newElement,
+  newPropChild,
   removeElements,
   newVariable,
-  updateElement: updatePath('elements'),
+  updatePath,
   updateVariable,
   displayError,
   displayOptions,

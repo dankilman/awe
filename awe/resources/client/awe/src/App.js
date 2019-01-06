@@ -11,24 +11,35 @@ import actions from './actions';
 import './App.css';
 
 function processElement(element) {
+  for (const [prop, root] of Object.entries(element.propChildren)) {
+    element.props[prop] = processElement(root);
+  }
   element.children = element.children.map(processElement);
   return components[element.elementType](element);
 }
 
-class App extends Component {
-  render() {
-    const elements = this.props.elements.toJS();
-    const variables = this.props.variables.toJS();
-    const style = this.props.style.toJS();
-    const {updateVariable, displayOptions, doExport} = this.props;
+function createRootElement(roots, elements, variables, updateVariable, style) {
     const sortedElements = Object.values(elements).sort((a, b) => a.index - b.index);
-    const rootElement = {elementType: 'div', children: [], props: {style}};
+    const rootElement = {elementType: 'div', children: [], props: {style}, propChildren: {}};
     for (const element of sortedElements) {
+      for (const [prop, rootId] of Object.entries(element.propChildren)) {
+        element.propChildren[prop] = createRootElement(roots, roots[rootId] || {}, variables, updateVariable);
+      }
       element.variables = variables;
       element.updateVariable = updateVariable;
       const parentElement = elements[element.parentId] || rootElement;
       parentElement.children.push(element);
     }
+    return rootElement;
+}
+
+class App extends Component {
+  render() {
+    const roots = this.props.roots.toJS();
+    const variables = this.props.variables.toJS();
+    const style = this.props.style.toJS();
+    const {updateVariable, displayOptions, doExport} = this.props;
+    const rootElement = createRootElement(roots, roots.root, variables, updateVariable, style);
     const processedRoot = processElement(rootElement);
     return (
       <HotKeys
@@ -49,7 +60,7 @@ class App extends Component {
 
 export default connect(
   state => ({
-    elements: state.get('elements'),
+    roots: state.get('roots'),
     variables: state.get('variables'),
     style: state.get('style')
   }),

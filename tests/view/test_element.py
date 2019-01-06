@@ -22,6 +22,33 @@ def test_element_style(element_tester):
     element_tester(builder, finder)
 
 
+def test_dynamic_new_prop(element_tester):
+    card_class = 'card1'
+    text_class = 'text1'
+    title_text = 'Title Text'
+
+    state = {}
+
+    def builder(page):
+        state['card'] = page.new_card('text', props={'className': card_class})
+
+    def finder(driver):
+        driver.find_element_by_class_name(card_class)
+
+    def add_title(page):
+        state['card'].new_prop('title').new_text(title_text, props={'className': text_class})
+
+    def find_title(driver):
+        assert driver.find_element_by_class_name(text_class).text == title_text
+
+    element_tester(
+        builder,
+        finder,
+        add_title,
+        find_title
+    )
+
+
 def test_remove(element_tester):
     text1_class = 'text1'
     text1_text = 'text 1'

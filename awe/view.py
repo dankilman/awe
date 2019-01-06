@@ -10,7 +10,8 @@ class Element(object):
 
     allow_children = True
 
-    def __init__(self, parent, element_id, props, style):
+    def __init__(self, root_id, parent, element_id, props, style):
+        self.root_id = root_id
         self.id = element_id or str(id(self))
         self.element_type = type(self).__name__
         self.parent = parent  # type: Element
@@ -21,6 +22,7 @@ class Element(object):
         self.props['key'] = self.id
         if style:
             self.props['style'] = style
+        self._prop_children = {}
         self._init_complete = False
         self._removed = False
 
@@ -189,6 +191,40 @@ class Element(object):
         """
         return self._new_child(Inline, text=text, **kwargs)
 
+    def new_prop(self, prop):
+        """
+        Create a new element based prop.
+
+        Mostly used by element implementations but can be used for some low level updates.
+
+        Normally, the regular ``props`` field is used to pass basic data structures to the underlying
+        react components. Sometimes however, the underlying react component prop accepts a ``ReactNode`` as
+        the prop value.
+        In these cases, using ``new_prop`` will create a new "root" element, similar to ``Page``.
+        Use the standard ``new_XXX`` methods on it to create the element hierarchy that will be passed to the underlying
+        react component prop.
+
+        Note that a prop named ``PROP_NAME`` can only be created if it doesn't already exist in ``props`` and was not
+        created with a previous ``new_prop`` call.
+
+        :param prop: The prop name.
+        :return: The created element based prop.
+        """
+        assert self.parent
+        assert prop not in self.props
+        assert prop not in self._prop_children
+        result = PropChild(self)
+        self._prop_children[prop] = result
+        if self._init_complete:
+            self._dispatch({
+                'type': 'newPropChild',
+                'id': result.id,
+                'prop': prop,
+                'elementRootId': self.root_id,
+                'elementId': self.id
+            })
+        return result
+
     def remove(self, element=None):
         """
         Remove an element from the page.
@@ -254,8 +290,9 @@ class Element(object):
         """
         assert not self._removed
         self._dispatch({
-            'type': 'updateElement',
+            'type': 'updatePath',
             'id': self.id,
+            'rootId': self.root_id,
             'updateData': {
                 'path': path,
                 'action': action,
@@ -266,22 +303,32 @@ class Element(object):
     def _get_view(self):
         return {
             'id': self.id,
+            'rootId': self.root_id,
             'index': self.index,
             'elementType': self.element_type,
             'data': self._prepare_data(self.data),
             'children': [t._get_view() for t in self.children],
-            'props': self.props
+            'props': self.props,
+            'propChildren': {
+                prop: {
+                    'id': prop_child.id,
+                    'children': [t._get_view() for t in prop_child.children]
+                }
+                for prop, prop_child in self._prop_children.items()
+            }
         }
 
     def _get_new_element_action(self):
         return {
             'type': 'newElement',
             'id': self.id,
+            'rootId': self.root_id,
             'index': self.index,
             'elementType': self.element_type,
             'data': self._prepare_data(self.data),
             'parentId': (self.parent.id or None) if self.parent else None,
-            'props': self.props
+            'props': self.props,
+            'propChildren': {p: c.id for p, c in self._prop_children.items()}
         }
 
     def _new_child(self, cls, **kwargs):
@@ -291,7 +338,8 @@ class Element(object):
         props = kwargs.pop('props', None)
         style = kwargs.pop('style', None)
         element_id = kwargs.pop('id', None)
-        result = cls(parent=self, element_id=element_id, props=props, style=style)  # type: Element
+        # type: Element
+        result = cls(root_id=self.root_id, parent=self, element_id=element_id, props=props, style=style)
         self._register(result)
         result._init(**kwargs)
         result._init_complete = True
@@ -301,16 +349,16 @@ class Element(object):
 
     def _remove_child(self, element):
         if element._removed:
-            return
+            return None
         assert not self._removed
-        ids = element._remove()
+        entries = element._remove()
         self._increase_version()
         self.children.remove(element)
         self._dispatch({
             'type': 'removeElements',
-            'ids': ids
+            'entries': entries
         })
-        return ids
+        return entries
 
     def _new_variable(self, value, variable_id=None):
         assert not self._removed
@@ -329,12 +377,16 @@ class Element(object):
         pass
 
     def _remove(self):
-        ids = [self.id]
+        entries = [{'id': self.id, 'rootId': self.root_id, 'type': 'element'}]
+        for prop_child in self._prop_children.values():
+            for child in prop_child.children:
+                entries.extend(child._remove())
+            entries.append({'id': prop_child.id, 'type': 'root'})
         for child in self.children:
-            ids.extend(child._remove())
+            entries.extend(child._remove())
         self._unregister(self)
         self._removed = True
-        return ids
+        return entries
 
     def _prepare_data(self, data):
         return data
@@ -350,6 +402,25 @@ class Element(object):
 
     def _increase_version(self):
         self.parent._increase_version()
+
+
+class PropChild(Element):
+
+    def __init__(self, element):
+        super(PropChild, self).__init__(root_id=str(id(self)), parent=None, element_id='', props=None, style=None)
+        self._element = element  # type: Element
+
+    def _increase_version(self):
+        self._element._increase_version()
+
+    def _register(self, obj, obj_id=None):
+        self._element._register(obj, obj_id)
+
+    def _unregister(self, obj, obj_id=None):
+        self._element._unregister(obj, obj_id)
+
+    def _dispatch(self, action, client_id=None):
+        self._element._dispatch(action)
 
 
 class Grid(Element):
@@ -378,11 +449,14 @@ class Collapse(Element):
         assert issubclass(cls, Panel)
         return super(Collapse, self)._new_child(cls, **kwargs)
 
-    def new_panel(self, header, active=False, **kwargs):
+    def new_panel(self, header=None, active=False, **kwargs):
         """
         Add a panel child.
 
-        :param header: The text to display as the panel header.
+        :param header: If supplied, should be the text to display as the panel header.
+                       Otherwise, the returned panel element will expose a ``header`` field.
+                       This field should be used to create an element hierarchy (similar to ``Page``) that will be
+                       passed as a ``ReactNode`` to the underlying ant design react ``Panel`` component.
         :param active: Should this panel be collapsed or expanded by default. (default: False)
         :return: The created panel element.
         """
@@ -397,7 +471,11 @@ class Collapse(Element):
 class Panel(Element):
 
     def _init(self, header):
-        self.update_props({'header': header}, override=False)
+        if header:
+            self.header = header
+            self.update_props({'header': header}, override=False)
+        else:
+            self.header = self.new_prop('header')
 
 
 class Text(Element):
@@ -563,7 +641,9 @@ class Input(Element):
         self._unregister(self._variable, self.id)
         if self._on_enter:
             self._unregister(self._on_enter, self.id)
-        return super(Input, self)._remove()
+        result = super(Input, self)._remove()
+        result.append({'id': self.id, 'type': 'variable'})
+        return result
 
 
 class Tabs(Element):
