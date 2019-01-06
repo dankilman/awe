@@ -29,5 +29,5 @@ class Registry(object):
         elif callable(obj):
             store = self.functions
         else:
-            raise RuntimeError('No registry is defined for objects of type'.format(type(obj).__name__))
+            raise RuntimeError('No registry is defined for objects of type {}'.format(type(obj).__name__))
         return obj_id, store
