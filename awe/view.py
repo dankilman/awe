@@ -225,6 +225,38 @@ class Element(object):
             })
         return result
 
+    def new(self, cls, **kwargs):
+        """
+        Add a new element of type ``cls``.
+
+        Note that this method is mostly useful in combination with custom element implementations.
+        Although, you can use it to create new elements of any type instead of using the regular ``new_XXX`` method.
+
+        :param cls: The ``Element`` subclass.
+        :param kwargs: Arguments that should be passed to the ``_init`` method of the element or one of
+                       ``props``, ``style``, ``id``.
+        :return: The created element.
+        """
+        if CustomElement._is_custom(cls) and not cls._registered:
+            self.register(cls)
+        return self._new_child(cls, **kwargs)
+
+    def register(self, custom_element_cls):
+        """
+        Register a new custom element.
+
+        Not that there is not need to explicitly call this method. When creating a new custom element,
+        the element will be registered for you if it isn't already registered.
+
+        :param custom_element_cls: A subclass of ``CustomElement``.
+        """
+        assert CustomElement._is_custom(custom_element_cls)
+        if custom_element_cls._registered:
+            return
+        self._register(custom_element_cls, obj_id=custom_element_cls.__name__)
+        custom_element_cls._registered = True
+        self._dispatch({'type': 'refresh'})
+
     def remove(self, element=None):
         """
         Remove an element from the page.
@@ -421,6 +453,27 @@ class PropChild(Element):
 
     def _dispatch(self, action, client_id=None):
         self._element._dispatch(action)
+
+
+class CustomElement(Element):
+    """
+    Base class for all custom element implementations.
+    """
+
+    _registered = False
+
+    @classmethod
+    def _is_custom(cls, obj):
+        return isinstance(obj, type) and issubclass(obj, cls)
+
+    @classmethod
+    def _js(cls):
+        """
+        Custom element javascript implementation and registration.
+
+        :return: The javascript code (as a python string) that registers the underlying react component.
+        """
+        raise NotImplementedError
 
 
 class Grid(Element):

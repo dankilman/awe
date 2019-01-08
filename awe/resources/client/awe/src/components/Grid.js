@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Row, Col} from 'antd/lib/grid';
+import * as antd from 'antd';
 
 class Grid extends Component {
   render() {
@@ -21,12 +21,12 @@ class Grid extends Component {
       }
       currentRowSpan += childColumnSpan;
       currentRow.push(
-        <Col
+        <antd.Col
           {...props}
           key={key}
           span={childColumnSpan}>
           {childComponent}
-        </Col>
+        </antd.Col>
       )
     }
     if (currentRow.length > 0) {
@@ -34,12 +34,12 @@ class Grid extends Component {
     }
     const paddingBottom = props.gutter || 0;
     return rows.map((row, i) => (
-      <Row
+      <antd.Row
         {...props}
         key={i.toString()}
         style={{paddingBottom}}>
         {row}
-      </Row>
+      </antd.Row>
     ));
   }
 }

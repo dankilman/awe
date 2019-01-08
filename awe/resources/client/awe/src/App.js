@@ -6,27 +6,29 @@ import Error from './components/internal/Error'
 import Options, {doExport} from './components/internal/Options'
 import DisplayOptionsButton from './components/internal/DisplayOptionsButton';
 import ExportObjectResult from './components/internal/ExportObjectResult';
-import {instance} from './Awe';
 import actions from './actions';
 import './App.css';
+
+const fallbackElementCreate = (element) => <div key={element.props.key}/>;
 
 function processElement(element) {
   for (const [prop, root] of Object.entries(element.propChildren)) {
     element.props[prop] = processElement(root);
   }
   element.children = element.children.map(processElement);
-  return components[element.elementType](element);
+  const elementType = element.elementType;
+  const create = components[elementType] || window.Awe.customElements[elementType] || fallbackElementCreate;
+  return create(element);
 }
 
-function createRootElement(roots, elements, variables, updateVariable, style) {
+function createRootElement(roots, elements, variables, style) {
     const sortedElements = Object.values(elements).sort((a, b) => a.index - b.index);
     const rootElement = {elementType: 'div', children: [], props: {style}, propChildren: {}};
     for (const element of sortedElements) {
       for (const [prop, rootId] of Object.entries(element.propChildren)) {
-        element.propChildren[prop] = createRootElement(roots, roots[rootId] || {}, variables, updateVariable);
+        element.propChildren[prop] = createRootElement(roots, roots[rootId] || {}, variables);
       }
       element.variables = variables;
-      element.updateVariable = updateVariable;
       const parentElement = elements[element.parentId] || rootElement;
       parentElement.children.push(element);
     }
@@ -38,8 +40,8 @@ class App extends Component {
     const roots = this.props.roots.toJS();
     const variables = this.props.variables.toJS();
     const style = this.props.style.toJS();
-    const {updateVariable, displayOptions, doExport} = this.props;
-    const rootElement = createRootElement(roots, roots.root, variables, updateVariable, style);
+    const {displayOptions, doExport} = this.props;
+    const rootElement = createRootElement(roots, roots.root, variables, style);
     const processedRoot = processElement(rootElement);
     return (
       <HotKeys
@@ -62,13 +64,10 @@ export default connect(
   state => ({
     roots: state.get('roots'),
     variables: state.get('variables'),
-    style: state.get('style')
+    style: state.get('style'),
+    reload: state.get('reload')
   }),
   dispatch => ({
-    updateVariable: (id, value) => {
-      dispatch(actions.updateVariable(id, value));
-      instance.updateVariable(id, value);
-    },
     displayOptions: () => dispatch(actions.displayOptions),
     doExport: doExport(dispatch, true),
   })

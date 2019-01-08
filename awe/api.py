@@ -8,6 +8,7 @@ from . import view
 from . import webserver
 from . import websocket
 from . import export
+from . import custom
 
 page = None
 
@@ -39,12 +40,15 @@ class Page(view.Element):
         self._style = self._set_default_style(style, width)
         self._registry = registry.Registry()
         self._message_handler = messages.MessageHandler(self._registry, self._dispatch)
+        self._custom_component = custom.CustomComponentHandler(self._registry)
         self._exporter = export.Exporter(
             export_fn=export_fn,
-            get_initial_state=self._get_initial_state)
+            get_initial_state=self._get_initial_state,
+            custom_component=self._custom_component)
         self._server = webserver.WebServer(
             exporter=self._exporter,
-            port=port)
+            port=port,
+            custom_component=self._custom_component)
         self._ws_server = websocket.WebSocketServer(self._message_handler)
         self._started = False
         self._version = 0

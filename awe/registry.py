@@ -6,6 +6,7 @@ class Registry(object):
 
     def __init__(self):
         self.elements = {}
+        self.element_types = {}
         self.functions = {}
         self.variables = {}
 
@@ -24,6 +25,8 @@ class Registry(object):
         obj_id = obj_id or getattr(obj, 'id', str(id(obj)))
         if isinstance(obj, view.Element):
             store = self.elements
+        elif isinstance(obj, type) and issubclass(obj, view.CustomElement):
+            store = self.element_types
         elif isinstance(obj, variables.Variable):
             store = self.variables
         elif callable(obj):

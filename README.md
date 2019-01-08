@@ -362,6 +362,47 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/collapse.png)
 
+### [custom_element.py](examples/custom_element.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/custom_element.html))
+
+A page that demonstrates the creation and usage of custom elements.
+
+
+```python
+from awe import Page, CustomElement
+
+
+class Popover(CustomElement):
+
+    def _init(self, title):
+        self.update_props({'title': title})
+
+    @classmethod
+    def _js(cls):
+        return '''
+        register((popover) => (
+            <antd.Popover {...popover.props}>
+                {popover.children}
+            </antd.Popover>
+        ));
+        '''
+
+
+def main():
+    page = Page()
+    popover = page.new(Popover, title='Some Title')
+    popover.new_button(lambda: None, 'Hover Me!')
+    content = popover.new_prop('content')
+    content.new_text('line 1')
+    content.new_text('line 2')
+    page.start(block=True, develop=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/custom_element.png)
+
 ### [showcase.py](examples/showcase.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/showcase.html))
 
 A page that showcases all (currently) available elements in `awe`.

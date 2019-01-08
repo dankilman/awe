@@ -32,9 +32,6 @@ def driver():
     result = webdriver.Chrome(options=options)
     result.set_window_size(1600, 1000)
     yield result
-    logs = result.get_log('browser')
-    print('Browser Logs:')
-    pprint.pprint(logs)
     result.close()
 
 
@@ -59,31 +56,43 @@ def retry(attempts=5, interval=1):
     return partial
 
 
+def _get_logs(driver):
+    logs = driver.get_log('browser')
+    return _remove_babel_browser_warning(logs)
+
+
 @pytest.fixture()
 def element_tester(driver, page):
     def tester(builder, finder, *rest):
+        logs = None
         builder(page)
-
         page.start(open_browser=False)
-
-        def new_finder():
-            driver.get('http://localhost:{}'.format(page._port))
-            finder(driver)
-
-        retry()(new_finder)()
-
-        assert len(rest) % 2 == 0
-        for i in range(0, len(rest), 2):
-            current_modifier = rest[i]
-            current_finder = rest[i + 1]
-            if current_modifier:
-                current_modifier(page)
-            retry()(current_finder)(driver)
-
-        logs = driver.get_log('browser')
-        if getattr(builder, 'validate_logs_exist', False):
-            assert logs
-        else:
-            assert not logs
+        try:
+            def new_finder():
+                driver.get('http://localhost:{}'.format(page._port))
+                finder(driver)
+            retry()(new_finder)()
+            assert len(rest) % 2 == 0
+            for i in range(0, len(rest), 2):
+                current_modifier = rest[i]
+                current_finder = rest[i + 1]
+                if current_modifier:
+                    current_modifier(page)
+                retry()(current_finder)(driver)
+            logs = _get_logs(driver)
+            if getattr(builder, 'validate_logs_exist', False):
+                assert logs
+            else:
+                assert not logs
+        finally:
+            if not logs:
+                logs = _get_logs(driver)
+            print('Browser Logs:')
+            pprint.pprint(logs)
 
     return tester
+
+
+def _remove_babel_browser_warning(logs):
+    message = 'You are using the in-browser Babel transformer'
+    return [l for l in logs if message not in l['message']]

@@ -13,6 +13,7 @@ Your contributions to this world are greatly appreciated.
 - [ant-design (MIT)](https://github.com/ant-design/ant-design)
 - [immutable.js (MIT)](https://github.com/facebook/immutable-js)
 - [lodash (MIT)](https://github.com/lodash/lodash)
+- [babel (MIT)](https://github.com/babel/babel)
 
 
 ## Not strictly open source but free for non commercial use

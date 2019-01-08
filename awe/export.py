@@ -27,11 +27,12 @@ resource_patterns = {
 
 class Exporter(object):
 
-    def __init__(self, export_fn, get_initial_state):
+    def __init__(self, export_fn, get_initial_state, custom_component):
         from . import __version__
         self.client_root = 'client/awe/build'
         self.export_fn = export_fn or self.default_export_fn
         self.get_initial_state = get_initial_state
+        self.custom_component = custom_component
         self.index = resources.get(os.path.join(self.client_root, 'index.html'))
         self.base_url = '{}/{}'.format(BASE_STATIC_URL, __version__)
 
@@ -43,6 +44,9 @@ class Exporter(object):
             index = pattern.sub('{}/{}'.format(self.base_url, r'\1'), index, 1)
         json_state = json.dumps(state, separators=(',', ':'))
         index = index.replace(frozen_state_format('null'), frozen_state_format(json_state), 1)
+        index = index.replace(
+            '<script type="text/babel" src="/custom-components"></script>',
+            self.custom_component.combined_script_with_script_tag(), 1)
         return export_fn(index)
 
     @staticmethod

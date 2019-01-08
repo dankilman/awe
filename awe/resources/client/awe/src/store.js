@@ -9,6 +9,7 @@ const initialState = fromJS({
   displayOptions: false,
   exportLoading: false,
   displayExportObjectResult: false,
+  reload: 0
 });
 
 function addChartData(data) {
@@ -164,6 +165,10 @@ function displayExportObjectResult(state, {displayExportObjectResult}) {
   return state.set('displayExportObjectResult', fromJS(displayExportObjectResult));
 }
 
+function reload(state) {
+  return state.set('reload', state.get('reload') + 1);
+}
+
 const reducers = {
   processInitialState,
   newElement,
@@ -176,6 +181,7 @@ const reducers = {
   displayOptions,
   exportLoading,
   displayExportObjectResult,
+  reload
 };
 
 function reducer(state = initialState, action) {

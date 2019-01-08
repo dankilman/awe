@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import AntTable from 'antd/lib/table/Table';
+import * as antd from 'antd';
 
 class Table extends Component {
   render() {
@@ -16,7 +16,7 @@ class Table extends Component {
       return result;
     });
     return (
-      <AntTable
+      <antd.Table
         {...table.props}
         dataSource={dataSource}
         columns={columns}

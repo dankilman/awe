@@ -1,4 +1,4 @@
-let instance = null;
+import actions from './actions'
 
 class Awe {
   constructor({store, host, port}) {
@@ -23,6 +23,7 @@ class Awe {
   }
 
   static start({store, host = '127.0.0.1', port = 9000, initialState}) {
+    let instance;
     if (initialState) {
       const notSupported = () => console.warn('This is not supported in offline mode');
       instance = {
@@ -36,7 +37,16 @@ class Awe {
     } else {
       instance = new Awe({store, host, port});
     }
-    return instance;
+
+    const customElements = {};
+    window.Awe = {
+      instance,
+      register: (name, fn) => {customElements[name] = fn},
+      customElements,
+      store,
+      call: instance.call.bind(instance),
+      updateVariable: instance.updateVariable.bind(instance)
+    };
   }
 
   static async fetchInitialState() {
@@ -52,6 +62,7 @@ class Awe {
   }
 
   updateVariable(variableId, value) {
+    this.store.dispatch(actions.updateVariable(variableId, value));
     this.sendMessage({type: 'updateVariable', variableId, value, clientId: this.clientId})
   }
 
@@ -63,6 +74,8 @@ class Awe {
     const action = JSON.parse(message.data);
     if (action.type === 'setClientId') {
       this.clientId = action.clientId;
+    } else if (action.type === 'refresh') {
+      document.location.reload();
     } else if (!this.finishedInitialFetch) {
       this.pendingActions.push(action);
     } else {
@@ -77,4 +90,3 @@ class Awe {
 }
 
 export default Awe;
-export {instance};

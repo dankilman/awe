@@ -212,3 +212,11 @@ def test_remove_with_prop_elements():
     text_removal = [{'type': 'element', 'id': text1.id, 'rootId': 'root'}]
     assert ((removed == text_removal + prop_removal(prop1, text11, text12) + prop_removal(prop2, text21, text22)) or
             (removed == text_removal + prop_removal(prop2, text21, text22) + prop_removal(prop1, text11, text12)))
+
+
+def test_register_validation():
+    page = Page()
+    with pytest.raises(AssertionError):
+        page.register(view.Panel)
+    with pytest.raises(AssertionError):
+        page.register({})

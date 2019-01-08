@@ -10,3 +10,4 @@ API
     tabs
     collapse
     decorators
+    custom

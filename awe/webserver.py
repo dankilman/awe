@@ -7,9 +7,10 @@ import bottle
 
 class WebServer(object):
 
-    def __init__(self, exporter, port):
+    def __init__(self, exporter, port, custom_component):
         self._port = port
         self._exporter = exporter
+        self._custom_component = custom_component
         self._get_initial_state = exporter.get_initial_state
         self._client_root = exporter.client_root
         self._content_root = os.path.join(os.path.dirname(__file__), 'resources', self._client_root)
@@ -18,6 +19,7 @@ class WebServer(object):
         self._app.route('/initial-state')(self._get_initial_state)
         self._app.route('/export')(self._export)
         self._app.route('/static/<path:path>')(self._get_static_file)
+        self._app.route('/custom-components')(self._components)
         self._thread = threading.Thread(target=self._run)
         self._thread.daemon = True
 
@@ -42,3 +44,7 @@ class WebServer(object):
         except Exception:
             bottle.response.status = 400
             return {'error': traceback.format_exc()}
+
+    def _components(self):
+        bottle.response.content_type = 'text/javascript'
+        return self._custom_component.combined_script()

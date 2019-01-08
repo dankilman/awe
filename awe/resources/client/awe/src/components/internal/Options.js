@@ -3,7 +3,6 @@ import Modal from 'antd/lib/modal';
 import Button from 'antd/lib/button';
 import {connect} from 'react-redux';
 import download from 'downloadjs';
-import {instance} from '../../Awe';
 import actions from '../../actions';
 
 
@@ -27,7 +26,7 @@ function doExport(dispatch, shouldDisplayOptions) {
     }
     startExportLoading();
     try {
-      const response = await instance.fetchExport();
+      const response = await window.Awe.instance.fetchExport();
       if (!response) {
         hideOptions();
         Modal.warn({title: 'Page is already exported'});

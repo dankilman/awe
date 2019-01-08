@@ -1,17 +1,12 @@
 import React from 'react';
-import Card from 'antd/lib/card';
-import Divider from 'antd/lib/divider';
-import Tabs from 'antd/lib/tabs';
-import Button from 'antd/lib/button';
-import Input from 'antd/lib/input';
-import Collapse from 'antd/lib/collapse';
-import Icon from 'antd/lib/icon';
+
+import * as antd from 'antd';
+
 import Table from './Table';
 import Inline from './Inline';
 import Grid from './Grid';
 import Text from './Text'
 import Chart from './Chart';
-import {instance} from '../Awe';
 
 const nativeComponents = {
   div: div => (
@@ -30,10 +25,10 @@ const connectedComponents = {
     />
   ),
   Card: card => (
-    <Card
+    <antd.Card
       {...card.props}>
       {card.children.length > 0 ? card.children : card.data.text}
-    </Card>
+    </antd.Card>
   ),
   Table: table => (
     <Table
@@ -48,47 +43,47 @@ const connectedComponents = {
     />
   ),
   Divider: divider => (
-    <Divider
+    <antd.Divider
       {...divider.props}
     />
   ),
   Collapse: collapse => (
-    <Collapse
+    <antd.Collapse
       {...collapse.props}>
       {collapse.children}
-    </Collapse>
+    </antd.Collapse>
   ),
   Panel: panel => (
-    <Collapse.Panel
+    <antd.Collapse.Panel
       {...panel.props}>
       {panel.children}
-    </Collapse.Panel>
+    </antd.Collapse.Panel>
   ),
   Tab: tab => (
-    <Tabs.TabPane
+    <antd.Tabs.TabPane
       {...tab.props}>
       {tab.children}
-    </Tabs.TabPane>
+    </antd.Tabs.TabPane>
   ),
   Tabs: tabs => (
-    <Tabs
+    <antd.Tabs
       {...tabs.props}>
       {tabs.children || <div/>}
-    </Tabs>
+    </antd.Tabs>
   ),
   Button: button => (
-    <Button
+    <antd.Button
       {...button.props}
-      onClick={() => instance.call(button.id)}>
+      onClick={() => window.Awe.call(button.id)}>
       {button.data.text}
-    </Button>
+    </antd.Button>
   ),
   Input: input => (
-    <Input
+    <antd.Input
       {...input.props}
       value={input.variables[input.id].value}
-      onChange={(e) => input.updateVariable(input.id, e.target.value)}
-      onPressEnter={() => input.data.enter ? instance.call(input.id) : null}
+      onChange={(e) => window.Awe.updateVariable(input.id, e.target.value)}
+      onPressEnter={() => input.data.enter ? window.Awe.call(input.id) : null}
     />
   ),
   Chart: chart => (
@@ -98,7 +93,7 @@ const connectedComponents = {
     />
   ),
   Icon: icon => (
-    <Icon
+    <antd.Icon
       {...icon.props}
     />
   ),
