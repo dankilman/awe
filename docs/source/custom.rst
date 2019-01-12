@@ -38,7 +38,7 @@ The above is exposed to elements in Python and JavaScript with these names:
 ================== ================== ===============
 Name               Python             Javascript
 ================== ================== ===============
-``element_type``   ``element_type``   N/A
+``element_type``   ``element_type``   ``elementType``
 ``id``             ``id``             ``id``
 ``parent``         ``parent``         ``parentId``
 ``root_id``        ``root_id``        ``rootId``
