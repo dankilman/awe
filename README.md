@@ -394,7 +394,7 @@ def main():
     content = popover.new_prop('content')
     content.new_text('line 1')
     content.new_text('line 2')
-    page.start(block=True, develop=True)
+    page.start(block=True)
 
 
 if __name__ == '__main__':
