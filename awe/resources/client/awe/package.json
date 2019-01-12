@@ -7,7 +7,7 @@
   "proxy": "http://localhost:8080",
   "dependencies": {
     "antd": "^3.11.0",
-    "babel-standalone": "^6.26.0",
+    "@babel/standalone": "^7.2.5",
     "downloadjs": "^1.4.7",
     "highcharts": "^7.0.0",
     "highcharts-react-official": "^2.0.0",
@@ -21,8 +21,8 @@
     "redux": "^4.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "NODE_OPTIONS=--max-old-space-size=3000 react-scripts start",
+    "build": "NODE_OPTIONS=--max-old-space-size=3000 react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

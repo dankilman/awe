@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import Babel from 'babel-standalone';
+import Babel from '@babel/standalone';
 import * as antd from 'antd';
 import {Provider} from 'react-redux';
 import App from './App';
