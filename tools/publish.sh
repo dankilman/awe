@@ -78,6 +78,7 @@ publish_static_files()
         --recursive \
         --acl public-read \
         --content-encoding gzip \
+        --cache-control max-age=2592000 \
         --exclude "*.map"
 }
 

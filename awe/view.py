@@ -461,6 +461,7 @@ class CustomElement(Element):
     """
 
     _registered = False
+    _scripts = []
 
     @classmethod
     def _is_custom(cls, obj):

@@ -39,13 +39,45 @@ class Awe {
     }
 
     const customElements = {};
+    const loadingScripts = [];
+    const onScriptsLoadedCallbacks = [];
+
+    function scriptLoaded() {
+      loadingScripts.pop();
+      runFinishScriptIfRequired();
+    }
+
+    function onScriptsLoaded(callback) {
+      onScriptsLoadedCallbacks.push(callback);
+    }
+
+    function runFinishScriptIfRequired() {
+      if (loadingScripts.length === 0) {
+        for (const callback of onScriptsLoadedCallbacks) {
+          callback();
+        }
+        store.dispatch({type: "reload"});
+      }
+    }
+
+    function addScript(script) {
+      loadingScripts.push(script);
+      const scriptElement = document.createElement('script');
+      scriptElement.type = 'text/javascript';
+      scriptElement.src = script;
+      document.head.append(scriptElement);
+      scriptElement.onload = scriptLoaded;
+    }
+
     window.Awe = {
-      instance,
       register: (name, fn) => {customElements[name] = fn},
       customElements,
-      store,
+      addScript,
+      onScriptsLoaded,
+      scriptSetupDone: runFinishScriptIfRequired,
       call: instance.call.bind(instance),
-      updateVariable: instance.updateVariable.bind(instance)
+      updateVariable: instance.updateVariable.bind(instance),
+      fetchExport: instance.fetchExport.bind(instance)
     };
   }
 

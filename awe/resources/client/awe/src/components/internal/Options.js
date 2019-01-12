@@ -26,7 +26,7 @@ function doExport(dispatch, shouldDisplayOptions) {
     }
     startExportLoading();
     try {
-      const response = await window.Awe.instance.fetchExport();
+      const response = await window.Awe.fetchExport();
       if (!response) {
         hideOptions();
         Modal.warn({title: 'Page is already exported'});

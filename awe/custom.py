@@ -15,8 +15,16 @@ class CustomComponentHandler(object):
 
     def combined_script(self):
         result = StringIO()
-        for name, element_type in self.registry.element_types.items():
-            result.write('((register) => {{{}}})((fn) => Awe.register("{}", fn));\n'
-                         .format(element_type._js(), name))
-        result.write('Awe.store.dispatch({type: "reload"})\n')
+        scripts = set()
+        element_types = self.registry.element_types
+        for element_type in element_types.values():
+            scripts |= set(element_type._scripts)
+        for script in scripts:
+            result.write('Awe.addScript("{}");\n'.format(script))
+        for name, element_type in element_types.items():
+            js = element_type._js()
+            result.write('Awe.onScriptsLoaded(() => ((register) => {{{}}})((fn) => Awe.register("{}", fn)));\n'
+                         .format(js, name))
+        if element_types:
+            result.write('Awe.scriptSetupDone();\n')
         return result.getvalue()

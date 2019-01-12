@@ -1,6 +1,14 @@
 from awe import Page, CustomElement
 
 
+class Moment(CustomElement):
+    _scripts = ['https://unpkg.com/moment@2.23.0/min/moment.min.js']
+
+    @classmethod
+    def _js(cls):
+        return 'register((e) => <div {...e.props}>{moment().format()}</div>);'
+
+
 class Popover(CustomElement):
 
     def _init(self, title):
@@ -9,11 +17,11 @@ class Popover(CustomElement):
     @classmethod
     def _js(cls):
         return '''
-        register((popover) => (
-            <antd.Popover {...popover.props}>
-                {popover.children}
-            </antd.Popover>
-        ));
+            register((popover) => (
+                <antd.Popover {...popover.props}>
+                    {popover.children}
+                </antd.Popover>
+            ));
         '''
 
 
@@ -23,7 +31,7 @@ def main():
     popover.new_button(lambda: None, 'Hover Me!')
     content = popover.new_prop('content')
     content.new_text('line 1')
-    content.new_text('line 2')
+    content.new(Moment)
     page.start(block=True)
 
 
