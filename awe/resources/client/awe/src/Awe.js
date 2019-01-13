@@ -1,4 +1,6 @@
-import actions from './actions'
+import actions from './actions';
+import {updateElementActions} from './store';
+import components from './components';
 
 class Awe {
   constructor({store, host, port}) {
@@ -38,7 +40,6 @@ class Awe {
       instance = new Awe({store, host, port});
     }
 
-    const customElements = {};
     const loadingScripts = [];
     const onScriptsLoadedCallbacks = [];
 
@@ -70,8 +71,8 @@ class Awe {
     }
 
     window.Awe = {
-      register: (name, fn) => {customElements[name] = fn},
-      customElements,
+      register: (name, fn) => {components[name] = fn},
+      registerUpdateElementAction: (name, fn) => {updateElementActions[name] = fn},
       addScript,
       onScriptsLoaded,
       scriptSetupDone: runFinishScriptIfRequired,

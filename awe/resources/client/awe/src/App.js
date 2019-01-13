@@ -17,7 +17,7 @@ function processElement(element) {
   }
   element.children = element.children.map(processElement);
   const elementType = element.elementType;
-  const create = components[elementType] || window.Awe.customElements[elementType] || fallbackElementCreate;
+  const create = components[elementType] || fallbackElementCreate;
   return create(element);
 }
 
