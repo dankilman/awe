@@ -150,3 +150,63 @@ def test_custom_element_external_script(element_tester):
         datetime.datetime.strptime(element.text[:19], '%Y-%m-%dT%H:%M:%S')
 
     element_tester(builder, finder)
+
+
+def test_custom_element_custom_update_element_action(element_tester):
+    custom_class = 'custom1'
+
+    class TestElement(CustomElement):
+
+        def _init(self, data):
+            self.update_data(data)
+
+        @classmethod
+        def _js(cls):
+            return '''
+                Awe.registerUpdateElementAction('removeKeys', data => map => map.deleteAll(data));
+                register((e) => (
+                    <div {...e.props}>
+                        {Object.values(e.data.map).map((v, i) => <div key={i.toString()}>{v}</div>)}
+                    </div>
+                ));
+            '''
+
+    element_data = {
+        'map': {
+            '1': 'one',
+            '2': 'two',
+            '3': 'three',
+            '4': 'four',
+        }
+    }
+
+    state = {}
+
+    def builder(page):
+        state['element'] = page.new(TestElement, data=element_data, props={'className': custom_class})
+
+    def finder(driver):
+        element = driver.find_element_by_class_name(custom_class)
+        text = element.text
+        for v in ['one', 'two', 'three', 'four']:
+            assert v in text
+
+    def remove_two_and_four(page):
+        element_data['map'].pop('2')
+        element_data['map'].pop('4')
+        state['element'].update_element(['data', 'map'], action='removeKeys', data=['2', '4'])
+
+    def verify_new_data(driver):
+        element = driver.find_element_by_class_name(custom_class)
+        text = element.text
+        for v in ['one', 'three']:
+            assert v in text
+        for v in ['two', 'four']:
+            assert v not in text
+
+    element_tester(
+        builder,
+        finder,
+        remove_two_and_four,
+        verify_new_data
+    )
