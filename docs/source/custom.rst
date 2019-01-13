@@ -321,8 +321,8 @@ TODO: document these
 * _register
 * Awe.call
 
-External Scripts
-----------------
+External Scripts And Stylesheets
+--------------------------------
 TODO: document
 
 Custom Update Element Action

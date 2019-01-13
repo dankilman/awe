@@ -69,9 +69,16 @@ class Awe {
       scriptElement.onload = scriptLoaded;
     }
 
+    function addStyle(style) {
+      const linkElement = document.createElement('link');
+      Object.assign(linkElement, style);
+      document.head.append(linkElement);
+    }
+
     window.Awe = {
       register: (name, fn) => {components[name] = fn},
       registerUpdateElementAction: (name, fn) => {updateElementActions[name] = fn},
+      addStyle,
       addScript,
       onScriptsLoaded,
       scriptSetupDone: runFinishScriptIfRequired,

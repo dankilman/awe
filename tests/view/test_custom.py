@@ -1,3 +1,4 @@
+# coding=utf-8
 import datetime
 
 from awe import CustomElement
@@ -168,6 +169,54 @@ def test_custom_element_external_script2(element_tester):
     def finder(driver):
         element = driver.find_element_by_class_name(custom_class)
         datetime.datetime.strptime(element.text[:19], '%Y-%m-%dT%H:%M:%S')
+
+    element_tester(builder, finder)
+
+
+def test_custom_element_external_style(element_tester):
+    custom_class = 'custom1'
+
+    class TestElement(CustomElement):
+        _styles = ['https://unpkg.com/ionicons@4.2.2/dist/css/ionicons.min.css']
+
+        @classmethod
+        def _js(cls):
+            return 'register((e) => <div {...e.props}><i className="icon ion-md-heart" /></div>)'
+
+    def builder(page):
+        page.new(TestElement, props={'className': custom_class})
+
+    def finder(driver):
+        v = driver.execute_script(
+            "return window"
+            "   .getComputedStyle(document.querySelector('.ion-md-heart'),':before')"
+            "   .getPropertyValue('content')"
+        )
+        assert v == u'""'
+
+    element_tester(builder, finder)
+
+
+def test_custom_element_external_style2(element_tester):
+    custom_class = 'custom1'
+
+    class TestElement(CustomElement):
+        _styles = [{'href': 'https://unpkg.com/ionicons@4.2.2/dist/css/ionicons.min.css'}]
+
+        @classmethod
+        def _js(cls):
+            return 'register((e) => <div {...e.props}><i className="icon ion-md-heart" /></div>)'
+
+    def builder(page):
+        page.new(TestElement, props={'className': custom_class})
+
+    def finder(driver):
+        v = driver.execute_script(
+            "return window"
+            "   .getComputedStyle(document.querySelector('.ion-md-heart'),':before')"
+            "   .getPropertyValue('content')"
+        )
+        assert v == u'""'
 
     element_tester(builder, finder)
 
