@@ -62,10 +62,9 @@ class Awe {
     }
 
     function addScript(script) {
-      loadingScripts.push(script);
+      loadingScripts.push(1);
       const scriptElement = document.createElement('script');
-      scriptElement.type = 'text/javascript';
-      scriptElement.src = script;
+      Object.assign(scriptElement, script);
       document.head.append(scriptElement);
       scriptElement.onload = scriptLoaded;
     }

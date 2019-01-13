@@ -1,3 +1,5 @@
+import json
+
 from six import StringIO
 
 
@@ -15,16 +17,25 @@ class CustomComponentHandler(object):
 
     def combined_script(self):
         result = StringIO()
-        scripts = set()
+        scripts = {}
         element_types = self.registry.element_types
         for element_type in element_types.values():
-            scripts |= set(element_type._scripts)
-        for script in scripts:
-            result.write('Awe.addScript("{}");\n'.format(script))
+            for script in element_type._scripts:
+                script = self._get_script_def(script)
+                scripts[script['src']] = script
+        for script in scripts.values():
+            result.write('Awe.addScript({});\n'.format(json.dumps(script, separators=(',', ':'))))
         for name, element_type in element_types.items():
-            js = element_type._js()
             result.write('Awe.onScriptsLoaded(() => ((register) => {{{}}})((fn) => Awe.register("{}", fn)));\n'
-                         .format(js, name))
+                         .format(element_type._js(), name))
         if element_types:
             result.write('Awe.scriptSetupDone();\n')
         return result.getvalue()
+
+    @staticmethod
+    def _get_script_def(script):
+        if isinstance(script, str):
+            script = {'src': script}
+        if 'type' not in script:
+            script['type'] = 'text/javascript'
+        return script

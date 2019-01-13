@@ -321,6 +321,22 @@ TODO: document these
 * _register
 * Awe.call
 
+External Scripts
+----------------
+TODO: document
+
+Custom Update Element Action
+----------------------------
+TODO: document
+
+Note
+----
+I stopped documenting the above sections because I am assuming very few people even use the most basic functionally of
+``awe``, let alone implement custom elements.
+
+If I am mistaken and you happen to be reading this and wishing the above would include useful information,
+open an issue on GitHub and I'll be happy to complete it, knowing someone finds it useful.
+
 Additional Reference
 --------------------
 

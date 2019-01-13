@@ -43,3 +43,6 @@ publish-examples:
 
 build-docs:
 	cd docs && sphinx-build source build
+
+serve-docs:
+	cd docs/build && python3 -m http.server
