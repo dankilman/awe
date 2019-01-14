@@ -103,6 +103,7 @@ The [examples](#examples) section can be used as reference for the different ele
 {{ example('standard_output') }}
 {{ example('collapse', 'png') }}
 {{ example('custom_element', 'png') }}
+{{ example('raw_html', 'png') }}
 {{ example('showcase', 'png') }}
 {{ example('kitchen') }}
 

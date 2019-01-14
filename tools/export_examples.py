@@ -21,6 +21,7 @@ examples = {
         'terminate_after': 70,
     },
     'custom_element': {},
+    'raw_html': {},
     'showcase': {},
     'kitchen': {
         'terminate_after': 60,

@@ -411,6 +411,45 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/custom_element.png)
 
+### [raw_html.py](examples/raw_html.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/raw_html.html))
+
+A page that demonstrates the creation and usage of raw html elements.
+
+Because sometimes, all you really need is a `div`.
+
+```python
+import awe
+
+colors = ['#b47eb3', '#fdf5bf', '#ffd5ff', '#92d1c3', '#8bb8a8']
+color = lambda i: colors[i % len(colors)]
+
+
+def main():
+    page = awe.Page()
+    grid = page.new_grid(columns=3)
+    for i in range(9):
+        div = grid.new('div', style={
+            'height': '240px',
+            'textAlign': 'center',
+            'backgroundColor': color(i)
+        })
+        lines = div.new_grid(columns=1)
+        for _ in range(2):
+            lines.new('br')
+        lines.new('h1').new_text('Text')
+        lines.new_text(str(i+1), style={
+            'fontSize': '50px',
+            'color': color(i+2)
+        })
+    page.start(block=True, develop=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/raw_html.png)
+
 ### [showcase.py](examples/showcase.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/showcase.html))
 
 A page that showcases all (currently) available elements in `awe`.

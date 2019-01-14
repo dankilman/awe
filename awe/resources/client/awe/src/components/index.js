@@ -102,6 +102,13 @@ const connectedComponents = {
       {...inline.props}
       inline={inline}
     />
+  ),
+  Raw: element => (
+    React.createElement(
+      element.data.tag,
+      element.props,
+      element.children.length > 0 ? element.children : undefined
+    )
   )
 };
 

@@ -22,6 +22,29 @@ def test_element_style(element_tester):
     element_tester(builder, finder)
 
 
+def test_raw_html_elements(element_tester):
+    h1_class = 'h11'
+    br_class = 'br1'
+    div_class = 'div1'
+    div_text = 'div text'
+
+    def builder(page):
+        h1 = page.new('h1', props={'className': h1_class})
+        h1.new('div', props={'className': div_class}).new_text(div_text)
+        h1.new('br', props={'className': br_class})
+
+    def finder(driver):
+        h1 = driver.find_element_by_class_name(h1_class)
+        assert h1.tag_name == 'h1'
+        div = h1.find_element_by_class_name(div_class)
+        assert div.tag_name == 'div'
+        assert div.text == div_text
+        br = h1.find_element_by_class_name(br_class)
+        assert br.tag_name == 'br'
+
+    element_tester(builder, finder)
+
+
 def test_dynamic_new_prop(element_tester):
     card_class = 'card1'
     text_class = 'text1'

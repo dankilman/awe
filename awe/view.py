@@ -225,21 +225,22 @@ class Element(object):
             })
         return result
 
-    def new(self, cls, **kwargs):
+    def new(self, element_type, **kwargs):
         """
-        Add a new element of type ``cls``.
+        Add a new element of type ``element_type`` or a raw html element with ``element_type`` tag.
 
-        Note that this method is mostly useful in combination with custom element implementations.
+        Note that this method is mostly useful for creating raw html elements or in combination with custom element
+        implementations.
         Although, you can use it to create new elements of any type instead of using the regular ``new_XXX`` method.
 
-        :param cls: The ``Element`` subclass.
+        :param element_type: The ``Element`` subclass or a string name of a raw html tag.
         :param kwargs: Arguments that should be passed to the ``_init`` method of the element or one of
-                       ``props``, ``style``, ``id``.
+                       ``props``, ``style``, ``id`` in case ``element_type`` is an element class.
         :return: The created element.
         """
-        if CustomElement._is_custom(cls) and not cls._registered:
-            self.register(cls)
-        return self._new_child(cls, **kwargs)
+        if CustomElement._is_custom(element_type) and not element_type._registered:
+            self.register(element_type)
+        return self._new_child(element_type, **kwargs)
 
     def register(self, custom_element_cls):
         """
@@ -363,15 +364,24 @@ class Element(object):
             'propChildren': {p: c.id for p, c in self._prop_children.items()}
         }
 
-    def _new_child(self, cls, **kwargs):
+    def _new_child(self, element_type, **kwargs):
         assert self.allow_children
         assert not self._removed
         self._increase_version()
         props = kwargs.pop('props', None)
         style = kwargs.pop('style', None)
         element_id = kwargs.pop('id', None)
+        if isinstance(element_type, str):
+            kwargs['tag'] = element_type
+            element_type = Raw
         # type: Element
-        result = cls(root_id=self.root_id, parent=self, element_id=element_id, props=props, style=style)
+        result = element_type(
+            root_id=self.root_id,
+            parent=self,
+            element_id=element_id,
+            props=props,
+            style=style
+        )
         self._register(result)
         result._init(**kwargs)
         result._init_complete = True
@@ -476,6 +486,12 @@ class CustomElement(Element):
         :return: The javascript code (as a python string) that registers the underlying react component.
         """
         raise NotImplementedError
+
+
+class Raw(Element):
+
+    def _init(self, tag):
+        self.update_data({'tag': tag})
 
 
 class Grid(Element):
