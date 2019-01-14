@@ -441,7 +441,7 @@ def main():
             'fontSize': '50px',
             'color': color(i+2)
         })
-    page.start(block=True, develop=True)
+    page.start(block=True)
 
 
 if __name__ == '__main__':
