@@ -185,9 +185,9 @@ from awe import Page
 def main():
     page = Page(offline=True)
     page.new_text('Hello')
-    print page.export()
+    print(page.export())
     # you can override the export_fn supplied during creation by passing
-    print page.export(export_fn=lambda index_html: index_html[:100])
+    print(page.export(export_fn=lambda index_html: index_html[:100]))
     
 
 if __name__ == '__main__':
