@@ -1,7 +1,7 @@
 # awe
 
 [![CircleCI](https://circleci.com/gh/dankilman/awe.svg?style=svg)](https://circleci.com/gh/dankilman/awe)
-[![PyPI version](https://badge.fury.io/py/awe.svg)](https://badge.fury.io/py/awe)
+[![PyPI version](https://img.shields.io/pypi/v/awe.svg?colorB=brightgreen)](https://pypi.org/project/awe)
 [![Documentation](https://readthedocs.org/projects/awe-pages/badge/?version=latest)](https://awe-pages.readthedocs.io)
 
 Dynamic web based reports/dashboards in Python.
