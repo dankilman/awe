@@ -3,6 +3,7 @@
 [![CircleCI](https://circleci.com/gh/dankilman/awe.svg?style=svg)](https://circleci.com/gh/dankilman/awe)
 [![PyPI version](https://img.shields.io/pypi/v/awe.svg?colorB=brightgreen)](https://pypi.org/project/awe)
 [![Documentation](https://readthedocs.org/projects/awe-pages/badge/?version=latest)](https://awe-pages.readthedocs.io)
+[![License](https://img.shields.io/github/license/dankilman/awe.svg?colorB=brightgreen)](https://github.com/dankilman/awe/blob/master/LICENSE)
 
 Dynamic web based reports/dashboards in Python.
 
