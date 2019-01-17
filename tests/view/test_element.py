@@ -41,6 +41,28 @@ def test_raw_html_elements(element_tester):
         assert div.text == div_text
         br = h1.find_element_by_class_name(br_class)
         assert br.tag_name == 'br'
+    element_tester(builder, finder)
+
+
+def test_link(element_tester):
+    link1_class = 'link1'
+    link2_class = 'link2'
+    link1_url = 'http://www.example.com'
+    link2_url = 'http://www.example2.com'
+    text1 = 'text 1'
+    text2 = 'text 2'
+
+    def builder(page):
+        page.new_link(link1_url, props={'className': link1_class}).new_text(text1)
+        page.new_link('something', props={'className': link2_class, 'href': link2_url}).new_text(text2)
+
+    def finder(driver):
+        link1 = driver.find_element_by_class_name(link1_class)
+        link2 = driver.find_element_by_class_name(link2_class)
+        for link in [link1, link2]:
+            assert link.tag_name == 'a'
+        assert link1.text == text1
+        assert link2.text == text2
 
     element_tester(builder, finder)
 

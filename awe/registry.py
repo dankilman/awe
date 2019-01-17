@@ -9,6 +9,7 @@ class Registry(object):
         self.element_types = {}
         self.functions = {}
         self.variables = {}
+        self.roots = {}
 
     def register(self, obj, obj_id=None):
         obj_id, store = self._get_id_and_store(obj, obj_id)
@@ -21,9 +22,14 @@ class Registry(object):
     def get_variables(self):
         return {k: var.get_variable() for k, var in self.variables.items()}
 
+    def get_roots(self):
+        return {k: [t._get_view() for t in root.children] for k, root in self.roots.items()}
+
     def _get_id_and_store(self, obj, obj_id):
         obj_id = obj_id or getattr(obj, 'id', str(id(obj)))
-        if isinstance(obj, view.Element):
+        if isinstance(obj, view.Root):
+            store = self.roots
+        elif isinstance(obj, view.Element):
             store = self.elements
         elif isinstance(obj, type) and issubclass(obj, view.CustomElement):
             store = self.element_types

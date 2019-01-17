@@ -63,3 +63,25 @@ def test_table(element_tester):
         lambda _: [t.set([[1, 11, 111], [2, 22, 222]]) for t in tables],
         lambda _: assert_sequence([1, 2])
     )
+
+
+def test_element_data(element_tester):
+    table_class = 'table1'
+
+    def builder(page):
+        b = page.element_builder
+        table = page.new_table(['header1', 'header2'], props={'className': table_class})
+        table.extend([
+            [1, b.link('#').new_text('2')],
+            [b.link('#').new_text('3'), 4]
+        ])
+
+    def finder(driver):
+        element = driver.find_element_by_class_name(table_class).find_element_by_tag_name('table')
+        data_rows = element.find_elements_by_tag_name('tr')[1:]
+        assert data_rows[0].text == '1\n2'
+        assert data_rows[1].text == '3\n4'
+        assert data_rows[0].find_element_by_tag_name('a').text == '2'
+        assert data_rows[1].find_element_by_tag_name('a').text == '3'
+
+    element_tester(builder, finder)

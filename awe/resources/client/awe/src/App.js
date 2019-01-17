@@ -11,29 +11,49 @@ import './App.css';
 
 const fallbackElementCreate = (element) => <div key={element.props.key}/>;
 
-function processElement(element) {
+function createComponentFromElement(element) {
   for (const [prop, root] of Object.entries(element.propChildren)) {
-    element.props[prop] = processElement(root);
+    element.props[prop] = createComponentFromElement(root);
   }
-  element.children = element.children.map(processElement);
+  element.children = element.children.map(createComponentFromElement);
   const elementType = element.elementType;
   const create = components[elementType] || fallbackElementCreate;
   return create(element);
 }
 
-function createRootElement(roots, elements, variables, style) {
-    const sortedElements = Object.values(elements).sort((a, b) => a.index - b.index);
+function createRootElement(roots, elements, variables, processData, style) {
+    const sortedElements = Object.values(elements || {}).sort((a, b) => a.index - b.index);
     const rootElement = {elementType: 'div', children: [], props: {style}, propChildren: {}};
     for (const element of sortedElements) {
       for (const [prop, rootId] of Object.entries(element.propChildren)) {
-        element.propChildren[prop] = createRootElement(roots, roots[rootId] || {}, variables);
+        element.propChildren[prop] = createRootElement(roots, roots[rootId] || {}, variables, processData);
       }
       element.variables = variables;
+      element.process = processData;
       const parentElement = elements[element.parentId] || rootElement;
       parentElement.children.push(element);
     }
     return rootElement;
 }
+
+function processRoot(roots, rootId, variables, style, processedRoots) {
+  const processData = (data) => {
+    if (data && data['_awe_root_']) {
+      return processRoot(roots, data['_awe_root_'], variables, undefined, processedRoots);
+    } else {
+      return data;
+    }
+  };
+  const processedRoot = processedRoots[rootId];
+  if (processedRoot) {
+    return processedRoot;
+  }
+  const rootElement = createRootElement(roots, roots[rootId], variables, processData, style);
+  const result = createComponentFromElement(rootElement);
+  processedRoots[rootId] = result;
+  return result;
+}
+
 
 class App extends Component {
   render() {
@@ -41,15 +61,13 @@ class App extends Component {
     const variables = this.props.variables.toJS();
     const style = this.props.style.toJS();
     const {displayOptions, doExport} = this.props;
-    const rootElement = createRootElement(roots, roots.root, variables, style);
-    const processedRoot = processElement(rootElement);
     return (
       <HotKeys
         focused
         keyMap={{displayOptions: 'A A A', doExport: 'A A E'}}
         handlers={{displayOptions, doExport}}>
         <div>
-          {processedRoot}
+          {processRoot(roots, 'root', variables, style, {})}
           <Error/>
           <Options/>
           <ExportObjectResult/>

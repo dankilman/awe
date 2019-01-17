@@ -24,6 +24,7 @@ def test_base():
             self.arg1 = arg1
             self.arg2 = arg2
 
+    assert page.root is page
     assert page.root_id == 'root'
     assert page.index == 0
     assert page._version == 0
@@ -36,6 +37,7 @@ def test_base():
 
     all_elements = [test_element, test_element2, test_element3, test_element4]
     for element in all_elements:
+        assert element.root is page
         assert element.root_id == 'root'
 
     assert page._registry.elements == {t.id: t for t in all_elements}
@@ -120,12 +122,16 @@ def test_new_prop():
     text1 = prop1.new_text('text1')
     card1 = prop1.new_card('card1')
 
+    for e in [prop1, text1, card1]:
+        assert e.root is prop1
+        assert e.root_id == prop1.id
+
     with pytest.raises(AssertionError):
         element.new_prop('prop1')
     with pytest.raises(AssertionError):
         element.new_prop('other_prop')
 
-    assert element._prop_children == {'prop1': prop1}
+    assert element._prop_children == {'prop1': prop1.id}
     assert prop1.id == str(id(prop1))
     assert prop1.children == [text1, card1]
 
@@ -197,21 +203,17 @@ def test_remove_with_prop_elements():
     text1 = page.new_text()
     prop1 = text1.new_prop('prop1')
     prop2 = text1.new_prop('prop2')
-    text11 = prop1.new_text()
-    text12 = prop1.new_text()
-    text21 = prop2.new_text()
-    text22 = prop2.new_text()
+    prop1.new_text()
+    prop1.new_text()
+    prop2.new_text()
+    prop2.new_text()
     removed = text1.remove()
 
-    def prop_removal(root, element1, element2):
-        return [
-            {'type': 'element', 'id': element1.id, 'rootId': root.id},
-            {'type': 'element', 'id': element2.id, 'rootId': root.id},
-            {'type': 'root', 'id': root.id},
-        ]
+    def prop_removal(root):
+        return [{'type': 'root', 'id': root.id}]
     text_removal = [{'type': 'element', 'id': text1.id, 'rootId': 'root'}]
-    assert ((removed == text_removal + prop_removal(prop1, text11, text12) + prop_removal(prop2, text21, text22)) or
-            (removed == text_removal + prop_removal(prop2, text21, text22) + prop_removal(prop1, text11, text12)))
+    assert ((removed == text_removal + prop_removal(prop1) + prop_removal(prop2)) or
+            (removed == text_removal + prop_removal(prop2) + prop_removal(prop1)))
 
 
 def test_register_validation():
@@ -220,3 +222,72 @@ def test_register_validation():
         page.register(view.Panel)
     with pytest.raises(AssertionError):
         page.register({})
+
+
+def test_stack():
+    page = Page()
+    assert page.n is page
+    assert page._stack == [page]
+    assert page.s is page
+    assert page._stack == [page, page]
+    assert page.n is page
+    assert page._stack == [page, page]
+    assert page.p is page
+    assert page._stack == [page]
+    assert page.n is page
+    assert page._stack == [page]
+
+    text1 = page.new_text()
+    assert text1.n is page
+    assert text1._stack == [page]
+    assert text1.s is text1
+    assert text1._stack == [page, text1]
+    assert text1.n is text1
+    assert text1._stack == [page, text1]
+    assert text1.p is text1
+    assert text1._stack == [page]
+    assert text1.n is page
+    assert text1._stack == [page]
+
+    prop = text1.new_prop('prop')
+    assert prop.n is prop
+    assert prop._stack == [prop]
+    assert prop.s is prop
+    assert prop._stack == [prop, prop]
+    assert prop.n is prop
+    assert prop._stack == [prop, prop]
+    assert prop.p is prop
+    assert prop._stack == [prop]
+    assert prop.n is prop
+    assert prop._stack == [prop]
+
+    text2 = prop.new_text()
+    assert text2.n is prop
+    assert text2._stack == [prop]
+    assert text2.s is text2
+    assert text2._stack == [prop, text2]
+    assert text2.n is text2
+    assert text2._stack == [prop, text2]
+    assert text2.p is text2
+    assert text2._stack == [prop]
+    assert text2.n is prop
+    assert text2._stack == [prop]
+
+
+def test_element_builder():
+    page = Page()
+    builder = page.element_builder
+    code_element1 = builder('code')
+    assert code_element1.element_type == 'Raw'
+    assert code_element1.data['tag'] == 'code'
+    code_element2 = builder('code', props={'test_key': 'test_value'})
+    assert code_element2.element_type == 'Raw'
+    assert code_element2.data['tag'] == 'code'
+    assert code_element2.props['test_key'] == 'test_value'
+    text_element1 = builder.text('hello')
+    assert text_element1.element_type == 'Text'
+    assert text_element1.text == 'hello'
+    text_element2 = builder.text('hello', props={'test_key2': 'test_value2'})
+    assert text_element2.element_type == 'Text'
+    assert text_element2.text == 'hello'
+    assert text_element2.props['test_key2'] == 'test_value2'

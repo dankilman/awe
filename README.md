@@ -451,6 +451,51 @@ if __name__ == '__main__':
  ```
 ![image](docs/images/raw_html.png)
 
+### [simple_report.py](examples/simple_report.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/simple_report.html))
+
+A page that shows how a report generation code may look like.
+
+It demonstrates usage of `awe`'s somewhat "fluent" API
+(`.s` (stash),
+`.n`, (next),
+`.p` (pop)).
+
+It also shows how to pass complex data to table cells using `page.element_builder`.
+
+It also tells the tale of Foxy Fox.
+
+```python
+import random
+
+from awe import Page
+
+
+def main():
+    page = Page()
+    b = page.element_builder
+    page.new('h1').new_text('Simple Report')
+    page.new_text('''Things weren't always so good for Foxy Fox.
+                     There were days when Fox had to do {thing}, which was hard and not very satisfying.
+    '''.format(thing='documentation'))
+    page.new('div').s.new_inline('But things are ').n.new('em').new_inline('better').n.new_inline(' now.')
+    page.new_text()
+    table = page.new_table(['Day', 'Number Of Emotions'])
+    for i in range(5):
+        number = random.randint(0, 1000)
+        url = 'https://www.google.com/search?q={}'.format(number)
+        table.append([
+            'Day {}'.format(i),
+            b.link(url).s.new('em').new_inline(str(number)).n.new_inline(' Emotions')
+        ])
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](docs/images/simple_report.png)
+
 ### [showcase.py](examples/showcase.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/showcase.html))
 
 A page that showcases all (currently) available elements in `awe`.
@@ -481,7 +526,7 @@ def main():
     inline = grid.new_inline()
     card.new_text('Card Text 1')
     card.new_text('Card Text 2')
-    tabs.new_tab('Tab 1').new_text('Tab 1 Text')
+    tabs.new_tab('Tab 1').new_link('https://github.com/dankilman/awe').new_text('Tab 1 Link')
     tabs.new_tab('Tab 2').new_text('Tab 2 Text')
     tabs.new_tab('Tab 3').new_text('Tab 3 Text')
     tabs.new_tab('Tab 4').new_text('Tab 4 Text')
@@ -493,7 +538,7 @@ def main():
     inline.new_inline('inline 1')
     inline.new_inline('inline 2')
     inline.new_inline('inline 3')
-    page.start(True)
+    page.start(block=True)
 
 
 if __name__ == '__main__':

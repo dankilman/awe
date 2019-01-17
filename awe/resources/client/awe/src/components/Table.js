@@ -4,14 +4,15 @@ import * as antd from 'antd';
 class Table extends Component {
   render() {
     const table = this.props.table;
+    const {process} = table;
     const {headers, rows} = table.data;
     const columns = headers.map((header) => ({title: header, dataIndex: header, key: header}));
     const dataSource = rows.map((row) => {
       const {data, id} = row;
       const pairs = data.map((e, i) => [headers[i], e]);
       const result = {key: id};
-      for (let [key, value] of pairs) {
-        result[key] = value;
+      for (let [columnKey, value] of pairs) {
+        result[columnKey] = process(value);
       }
       return result;
     });

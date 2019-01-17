@@ -1,12 +1,11 @@
-import json
-
 from six import StringIO
 
 
 class CustomComponentHandler(object):
 
-    def __init__(self, registry):
+    def __init__(self, registry, encoder):
         self.registry = registry
+        self.encoder = encoder
 
     def combined_script_with_script_tag(self):
         result = StringIO()
@@ -28,9 +27,9 @@ class CustomComponentHandler(object):
                 script = self._get_script_def(script)
                 scripts[script['src']] = script
         for style in styles.values():
-            result.write('Awe.addStyle({});\n'.format(json.dumps(style, separators=(',', ':'))))
+            result.write('Awe.addStyle({});\n'.format(self.encoder.to_json(style)))
         for script in scripts.values():
-            result.write('Awe.addScript({});\n'.format(json.dumps(script, separators=(',', ':'))))
+            result.write('Awe.addScript({});\n'.format(self.encoder.to_json(script)))
         for name, element_type in element_types.items():
             result.write('Awe.onScriptsLoaded(() => ((register) => {{{}}})((fn) => Awe.register("{}", fn)));\n'
                          .format(element_type._js(), name))

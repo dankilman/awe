@@ -10,9 +10,11 @@ class Element(object):
 
     allow_children = True
 
-    def __init__(self, root_id, parent, element_id, props, style):
-        self.root_id = root_id
+    def __init__(self, root, parent, element_id, props, style, stack):
+        self.root = root
         self.id = element_id or str(id(self))
+        self.root_id = getattr(root, 'id', self.id)
+        self.element_builder = getattr(root, 'element_builder', ElementBuilder(root))
         self.element_type = type(self).__name__
         self.parent = parent  # type: Element
         self.index = len(parent.children) + 1 if isinstance(parent, Element) else 0
@@ -25,6 +27,7 @@ class Element(object):
         self._prop_children = {}
         self._init_complete = False
         self._removed = False
+        self._stack = stack
 
     def new_grid(self, columns, **kwargs):
         """
@@ -191,6 +194,17 @@ class Element(object):
         """
         return self._new_child(Inline, text=text, **kwargs)
 
+    def new_link(self, link, **kwargs):
+        """
+        Add a new link element.
+
+        :param link: The link (URL)
+        :return: The created link element.
+        """
+        props = kwargs.setdefault('props', {})
+        props.setdefault('href', link)
+        return self._new_child(Raw, tag='a', **kwargs)
+
     def new_prop(self, prop):
         """
         Create a new element based prop.
@@ -213,8 +227,8 @@ class Element(object):
         assert self.parent
         assert prop not in self.props
         assert prop not in self._prop_children
-        result = PropChild(self)
-        self._prop_children[prop] = result
+        result = self._new_root()
+        self._prop_children[prop] = result.id
         if self._init_complete:
             self._dispatch({
                 'type': 'newPropChild',
@@ -280,7 +294,7 @@ class Element(object):
         self.data.update(data)
         if not self._init_complete:
             return
-        self.update_element(path=['data'], action='set', data=self._prepare_data(self.data))
+        self.update_element(path=['data'], action='set', data=self.data)
 
     def update_props(self, props, override=True):
         """
@@ -333,22 +347,49 @@ class Element(object):
             }
         })
 
+    @property
+    def s(self):
+        """
+        Push current element to stack and return self.
+
+        :return: self.
+        """
+        return self._stack_stash()
+
+    @property
+    def p(self):
+        """
+        Pop an element from the stack.
+
+        :return: The popped element.
+        """
+        return self._stack_pop()
+
+    @property
+    def n(self):
+        """
+        Return the top most stack element.
+
+        :return: The last stacked element or the current root element if none was stacked.
+        """
+        return self._stack_next()
+
+    def _init(self, **kwargs):
+        """
+        Called after element was created with arguments supplied to its new_XXX method.
+        """
+        pass
+
     def _get_view(self):
         return {
             'id': self.id,
             'rootId': self.root_id,
             'index': self.index,
             'elementType': self.element_type,
-            'data': self._prepare_data(self.data),
+            'data': self.data,
             'children': [t._get_view() for t in self.children],
             'props': self.props,
-            'propChildren': {
-                prop: {
-                    'id': prop_child.id,
-                    'children': [t._get_view() for t in prop_child.children]
-                }
-                for prop, prop_child in self._prop_children.items()
-            }
+            'propChildren': self._prop_children
         }
 
     def _get_new_element_action(self):
@@ -358,10 +399,10 @@ class Element(object):
             'rootId': self.root_id,
             'index': self.index,
             'elementType': self.element_type,
-            'data': self._prepare_data(self.data),
+            'data': self.data,
             'parentId': (self.parent.id or None) if self.parent else None,
             'props': self.props,
-            'propChildren': {p: c.id for p, c in self._prop_children.items()}
+            'propChildren': self._prop_children
         }
 
     def _new_child(self, element_type, **kwargs):
@@ -376,11 +417,12 @@ class Element(object):
             element_type = Raw
         # type: Element
         result = element_type(
-            root_id=self.root_id,
+            root=self.root,
             parent=self,
             element_id=element_id,
             props=props,
-            style=style
+            style=style,
+            stack=self._stack,
         )
         self._register(result)
         result._init(**kwargs)
@@ -415,54 +457,84 @@ class Element(object):
         })
         return variable
 
-    def _init(self, *args, **kwargs):
-        pass
+    def _new_root(self):
+        assert not self._removed
+        self._increase_version()
+        result = Root(owner=self.root)
+        self._register(result)
+        return result
 
     def _remove(self):
         entries = [{'id': self.id, 'rootId': self.root_id, 'type': 'element'}]
-        for prop_child in self._prop_children.values():
-            for child in prop_child.children:
-                entries.extend(child._remove())
-            entries.append({'id': prop_child.id, 'type': 'root'})
+        for prop_child_id in self._prop_children.values():
+            entries.append({'id': prop_child_id, 'type': 'root'})
         for child in self.children:
             entries.extend(child._remove())
         self._unregister(self)
         self._removed = True
         return entries
 
-    def _prepare_data(self, data):
-        return data
-
     def _register(self, obj, obj_id=None):
-        self.parent._register(obj, obj_id)
+        self.root._register(obj, obj_id)
 
     def _unregister(self, obj, obj_id=None):
-        self.parent._unregister(obj, obj_id)
+        self.root._unregister(obj, obj_id)
 
     def _dispatch(self, action):
-        self.parent._dispatch(action)
+        self.root._dispatch(action)
 
     def _increase_version(self):
-        self.parent._increase_version()
+        self.root._increase_version()
+
+    def _stack_stash(self):
+        self._stack.append(self)
+        return self
+
+    def _stack_pop(self):
+        return self._stack.pop()
+
+    def _stack_next(self):
+        return self._stack[-1]
 
 
-class PropChild(Element):
+class Root(Element):
 
-    def __init__(self, element):
-        super(PropChild, self).__init__(root_id=str(id(self)), parent=None, element_id='', props=None, style=None)
-        self._element = element  # type: Element
+    def __init__(self, owner, element_id=None):
+        super(Root, self).__init__(
+            root=self,
+            parent=None,
+            element_id=element_id,
+            props=None,
+            style=None,
+            stack=[self]
+        )
+        self._owner = owner  # type: Element
 
     def _increase_version(self):
-        self._element._increase_version()
+        self._owner._increase_version()
 
     def _register(self, obj, obj_id=None):
-        self._element._register(obj, obj_id)
+        self._owner._register(obj, obj_id)
 
     def _unregister(self, obj, obj_id=None):
-        self._element._unregister(obj, obj_id)
+        self._owner._unregister(obj, obj_id)
 
     def _dispatch(self, action, client_id=None):
-        self._element._dispatch(action)
+        self._owner._dispatch(action)
+
+
+class ElementBuilder(object):
+
+    def __init__(self, owner):
+        self._owner = owner  # type: Element
+
+    def __call__(self, *args, **kwargs):
+        root = self._owner._new_root()
+        return root.new(*args, **kwargs)
+
+    def __getattr__(self, item):
+        root = self._owner._new_root()
+        return getattr(root, 'new_{}'.format(item))
 
 
 class CustomElement(Element):
@@ -648,11 +720,6 @@ class Table(Element):
         if isinstance(row, dict):
             row = [row[h] for h in self.data['headers']]
         return {'data': row, 'id': len(self.data['rows']) + 1 + offset}
-
-    def _prepare_data(self, data):
-        result = data.copy()
-        result['rows'] = list(result['rows'])
-        return result
 
 
 class Button(Element):

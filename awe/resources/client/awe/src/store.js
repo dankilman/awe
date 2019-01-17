@@ -65,15 +65,7 @@ const updateElementActions = {
 };
 
 function processElement(map, element, rootId) {
-  const {children, id, propChildren} = element;
-  const newPropChildren = {};
-  for (const [prop, {id: propChildRootId, children}] of Object.entries(propChildren)) {
-    for (const child of children) {
-      newPropChildren[prop] = propChildRootId;
-      map = processElement(map, child, propChildRootId);
-    }
-  }
-  element.propChildren = newPropChildren;
+  const {children, id} = element;
   element.rootId = rootId;
   map = newElement(map, element);
   if (children) {
@@ -85,14 +77,16 @@ function processElement(map, element, rootId) {
   return map;
 }
 
-function processInitialState(state, {style, variables, children}) {
+function processInitialState(state, {style, variables, roots}) {
   return state.withMutations(map => {
     map = map.set('style', fromJS(style));
     for (const variable of Object.values(variables)) {
       map = newVariable(map, variable)
     }
-    for (const child of children) {
-      map = processElement(map, child, 'root');
+    for (const [rootId, children] of Object.entries(roots)) {
+      for (const child of children) {
+        map = processElement(map, child, rootId);
+      }
     }
     return map;
   });

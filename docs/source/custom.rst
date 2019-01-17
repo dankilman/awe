@@ -236,11 +236,6 @@ Advanced Element Updates
             self.update_element(['data', 'deque1'], action='prepend', data=now)
             self.update_element(['data', 'nested', 'list2'], action='extend', data=list2_data)
 
-        def _prepare_data(self, data):
-            result = data.copy()
-            result['deque1'] = list(result['deque1'])
-            return result
-
         @classmethod
         def _js(cls):
             return '''
@@ -327,6 +322,10 @@ TODO: document
 
 Custom Update Element Action
 ----------------------------
+TODO: document
+
+Custom Serializers
+------------------
 TODO: document
 
 Note

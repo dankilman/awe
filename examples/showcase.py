@@ -23,7 +23,7 @@ def main():
     inline = grid.new_inline()
     card.new_text('Card Text 1')
     card.new_text('Card Text 2')
-    tabs.new_tab('Tab 1').new_text('Tab 1 Text')
+    tabs.new_tab('Tab 1').new_link('https://github.com/dankilman/awe').new_text('Tab 1 Link')
     tabs.new_tab('Tab 2').new_text('Tab 2 Text')
     tabs.new_tab('Tab 3').new_text('Tab 3 Text')
     tabs.new_tab('Tab 4').new_text('Tab 4 Text')
@@ -35,7 +35,7 @@ def main():
     inline.new_inline('inline 1')
     inline.new_inline('inline 2')
     inline.new_inline('inline 3')
-    page.start(True)
+    page.start(block=True)
 
 
 if __name__ == '__main__':

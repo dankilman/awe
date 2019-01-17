@@ -5,6 +5,7 @@ import webbrowser
 from . import messages
 from . import registry
 from . import view
+from . import encoding
 from . import webserver
 from . import websocket
 from . import export
@@ -15,7 +16,7 @@ page = None
 DEFAULT_WIDTH = 1200
 
 
-class Page(view.Element):
+class Page(view.Root):
 
     def __init__(
             self,
@@ -24,7 +25,8 @@ class Page(view.Element):
             width=None,
             style=None,
             export_fn=None,
-            offline=False):
+            offline=False,
+            serializers=None):
         """
         :param title: Page title.
         :param port: Webserver port.
@@ -32,24 +34,41 @@ class Page(view.Element):
         :param style: Set custom javascript style object.
         :param export_fn: Override default export function.
         :param offline: Offline mode means start/block don't do anything. Useful when exporting directly from python.
+        :param serializers: Custom serializers for custom element implementations.
         """
-        super(Page, self).__init__(root_id='root', parent=None, element_id='', props=None, style=None)
+        super(Page, self).__init__(owner=self, element_id='root')
+        self._registry = registry.Registry()
+        self._register(self)
         self._offline = (offline or os.environ.get('AWE_OFFLINE'))
         self._port = port
         self._title = title
         self._style = self._set_default_style(style, width)
-        self._registry = registry.Registry()
-        self._message_handler = messages.MessageHandler(self._registry, self._dispatch)
-        self._custom_component = custom.CustomComponentHandler(self._registry)
+        self._encoder = encoding.Encoder(
+            element_cls=view.Element,
+            serializers=serializers
+        )
+        self._message_handler = messages.MessageHandler(
+            registry=self._registry,
+            dispatch=self._dispatch
+        )
+        self._custom_component = custom.CustomComponentHandler(
+            registry=self._registry,
+            encoder=self._encoder
+        )
         self._exporter = export.Exporter(
             export_fn=export_fn,
             get_initial_state=self._get_initial_state,
-            custom_component=self._custom_component)
+            custom_component=self._custom_component,
+            encoder=self._encoder)
         self._server = webserver.WebServer(
             exporter=self._exporter,
             port=port,
-            custom_component=self._custom_component)
-        self._ws_server = websocket.WebSocketServer(self._message_handler)
+            custom_component=self._custom_component,
+            encoder=self._encoder)
+        self._ws_server = websocket.WebSocketServer(
+            message_handler=self._message_handler,
+            encoder=self._encoder
+        )
         self._started = False
         self._version = 0
         self._closed = False
@@ -104,7 +123,7 @@ class Page(view.Element):
 
     def _get_initial_state(self):
         return {
-            'children': [t._get_view() for t in self.children],
+            'roots': self._registry.get_roots(),
             'variables': self._registry.get_variables(),
             'version': self._version,
             'style': self._style,
