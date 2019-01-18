@@ -85,3 +85,36 @@ def test_element_data(element_tester):
         assert data_rows[1].find_element_by_tag_name('a').text == '3'
 
     element_tester(builder, finder)
+
+
+def test_table_sorting(element_tester):
+    table_class = 'table1'
+    state = {}
+
+    def builder(page):
+        table = page.new_table(['header1', 'header2'], props={'className': table_class})
+        table.extend([[5, 'def'], [10, 'hij']])
+
+    def assert_rows(driver, rows):
+        table = driver.find_element_by_class_name(table_class).find_element_by_tag_name('table')
+        _, data_row1, data_row2 = table.find_elements_by_tag_name('tr')
+        assert data_row1.text == rows[0]
+        assert data_row2.text == rows[1]
+
+    def finder(driver):
+        table = driver.find_element_by_class_name(table_class).find_element_by_tag_name('table')
+        rows = table.find_elements_by_tag_name('tr')
+        header, data_row1, data_row2 = rows
+        header1, header2 = header.find_elements_by_tag_name('th')
+        state['header1'] = header1
+        state['header2'] = header2
+        assert_rows(driver, ['5 def', '10 hij'])
+
+    element_tester(
+        builder,
+        finder,
+        lambda _: [state['header1'].click() for _ in range(2)],
+        lambda d: assert_rows(d, ['10 hij', '5 def']),
+        lambda _: state['header2'].click(),
+        lambda d: assert_rows(d, ['5 def', '10 hij'])
+    )
