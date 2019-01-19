@@ -105,7 +105,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/hello_world.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/hello_world.png)
 
 ### [chart_simple.py](examples/chart_simple.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.html))
 
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/chart_simple.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/chart_simple.gif)
 
 ### [chart_complex.py](examples/chart_complex.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.html))
 
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/chart_complex.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/chart_complex.gif)
 
 ### [chart_flat.py](examples/chart_flat.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.html))
 
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/chart_flat.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/chart_flat.gif)
 
 ### [page_properties.py](examples/page_properties.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/page_properties.html))
 
@@ -264,7 +264,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/page_properties.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/page_properties.png)
 
 ### [button_and_input.py](examples/button_and_input.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.html))
 
@@ -303,7 +303,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/button_and_input.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/button_and_input.gif)
 
 ### [standard_output.py](examples/standard_output.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/standard_output.html))
 
@@ -331,7 +331,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/standard_output.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/standard_output.gif)
 
 ### [collapse.py](examples/collapse.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/collapse.html))
 
@@ -361,7 +361,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/collapse.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/collapse.png)
 
 ### [custom_element.py](examples/custom_element.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/custom_element.html))
 
@@ -410,7 +410,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/custom_element.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/custom_element.png)
 
 ### [raw_html.py](examples/raw_html.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/raw_html.html))
 
@@ -449,7 +449,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/raw_html.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/raw_html.png)
 
 ### [simple_report.py](examples/simple_report.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/simple_report.html))
 
@@ -494,7 +494,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/simple_report.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/simple_report.png)
 
 ### [showcase.py](examples/showcase.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/showcase.html))
 
@@ -545,7 +545,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/showcase.png)
+![image](https://s3.amazonaws.com/awe-static-files/examples/showcase.png)
 
 ### [kitchen.py](examples/kitchen.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html))
 
@@ -643,7 +643,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](docs/images/kitchen.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/kitchen.gif)
 
 
 ## Supported Python Versions

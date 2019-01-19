@@ -92,7 +92,7 @@ The [examples](#examples) section can be used as reference for the different ele
 ```python
 {{ load(name) }}
  ```
-![image](docs/images/{{name}}.{{extension}})
+![image](https://s3.amazonaws.com/awe-static-files/examples/{{name}}.{{extension}})
 {% endmacro %}
 
 {{ example('hello_world', 'png') }}
