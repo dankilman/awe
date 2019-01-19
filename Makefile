@@ -36,7 +36,10 @@ finish-feature:
 	tools/finish-feature.sh
 
 export-examples:
-	python tools/export_examples.py
+	python tools/export_examples.py export_examples
+
+generate-screenshots:
+	python tools/export_examples.py generate_screenshots
 
 publish-examples:
 	tools/publish-examples.sh
