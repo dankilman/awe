@@ -4,24 +4,26 @@ import re
 from . import resources
 
 BASE_STATIC_URL = 'https://s3.amazonaws.com/awe-static-files/dist'
+BASE_URL = os.environ.get('AWE_EXPORT_BASE_URL')
 
 
-def resource_regex_pattern(extension, prefix):
+def resource_regex_pattern(prefix, extension):
     regex = r'/static/(static/{extension}/{prefix}\.[0-9a-f]{{8}}\.chunk\.{extension})'.format(
-        extension=extension,
-        prefix=prefix
+        prefix=prefix,
+        extension=extension
     )
     return re.compile(regex)
 
 
 frozen_state_format = 'window.frozenState={}'.format
 favicon = '/static/favicon.ico'
-resource_patterns = {
-    'vendor.css': resource_regex_pattern('css', '1'),
-    'main.css': resource_regex_pattern('css', 'main'),
-    'vendor.js': resource_regex_pattern('js', '1'),
-    'main.js': resource_regex_pattern('js', 'main'),
-}
+index_resources = [
+    ('1', 'css'),
+    ('main', 'css'),
+    ('1', 'js'),
+    ('main', 'js')
+]
+resource_patterns = [resource_regex_pattern(*args) for args in index_resources]
 
 
 class Exporter(object):
@@ -34,14 +36,14 @@ class Exporter(object):
         self.custom_component = custom_component
         self.encoder = encoder
         self.index = resources.get(os.path.join(self.client_root, 'index.html'))
-        self.base_url = '{}/{}'.format(BASE_STATIC_URL, __version__)
+        self.base_url = BASE_URL or '{}/{}'.format(BASE_STATIC_URL, __version__)
 
     def export(self, export_fn=None):
         export_fn = export_fn or self.export_fn
-        state = self.get_initial_state()
         index = self.index.replace(favicon, '{}/{}'.format(self.base_url, 'favicon.ico'), 1)
-        for key, pattern in resource_patterns.items():
+        for pattern in resource_patterns:
             index = pattern.sub('{}/{}'.format(self.base_url, r'\1'), index, 1)
+        state = self.get_initial_state()
         json_state = self.encoder.to_json(state)
         index = index.replace(frozen_state_format('null'), frozen_state_format(json_state), 1)
         index = index.replace(
