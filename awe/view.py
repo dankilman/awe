@@ -205,6 +205,15 @@ class Element(object):
         props.setdefault('href', link)
         return self._new_child(Raw, tag='a', **kwargs)
 
+    def new_markdown(self, source, **kwargs):
+        """
+        Add a new markdown element.
+
+        :param source: The markdown source.
+        :return: The created markdown element.
+        """
+        return self._new_child(Markdown, source=source, **kwargs)
+
     def new_prop(self, prop):
         """
         Create a new element based prop.
@@ -238,15 +247,6 @@ class Element(object):
                 'elementId': self.id
             })
         return result
-
-    def new_markdown(self, source, **kwargs):
-        """
-        Add a new markdown element.
-
-        :param source: The markdown source.
-        :return: The created markdown element.
-        """
-        return self._new_child(Markdown, source=source, **kwargs)
 
     def new(self, element_type, **kwargs):
         """
