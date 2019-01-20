@@ -529,7 +529,7 @@ if __name__ == '__main__':
 
 ### [showcase.py](examples/showcase.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/showcase.html))
 
-A page that showcases all (currently) available elements in `awe`.
+A page that showcases many (currently) available elements in `awe`.
 
 ```python
 import time

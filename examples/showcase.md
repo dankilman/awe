@@ -1,1 +1,1 @@
-A page that showcases all (currently) available elements in `awe`.
+A page that showcases many (currently) available elements in `awe`.
