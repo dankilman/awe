@@ -1,6 +1,7 @@
 import React from 'react';
 
 import * as antd from 'antd';
+import ReactMarkdown from 'react-markdown';
 
 import Table from './Table';
 import Inline from './Inline';
@@ -109,6 +110,11 @@ const connectedComponents = {
       element.props,
       element.children.length > 0 ? element.children : undefined
     )
+  ),
+  Markdown: markdown => (
+    <ReactMarkdown
+      {...markdown.props}
+    />
   )
 };
 

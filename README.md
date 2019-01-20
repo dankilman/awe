@@ -496,6 +496,37 @@ if __name__ == '__main__':
  ```
 ![image](https://s3.amazonaws.com/awe-static-files/examples/simple_report.png)
 
+### [markdown.py](examples/markdown.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/markdown.html))
+
+A page that demonstrates using the markdown element.
+
+
+```python
+from awe import Page
+
+
+def main():
+    page = Page()
+    page.new_markdown('''
+# Hello There
+
+This is a markdown document. Thanks react-markdown!
+
+## Let's try a list
+
+1. Item 1
+1. Item 2
+1. Item 3
+    ''')
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](https://s3.amazonaws.com/awe-static-files/examples/markdown.png)
+
 ### [showcase.py](examples/showcase.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/showcase.html))
 
 A page that showcases all (currently) available elements in `awe`.

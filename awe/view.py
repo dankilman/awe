@@ -239,6 +239,15 @@ class Element(object):
             })
         return result
 
+    def new_markdown(self, source, **kwargs):
+        """
+        Add a new markdown element.
+
+        :param source: The markdown source.
+        :return: The created markdown element.
+        """
+        return self._new_child(Markdown, source=source, **kwargs)
+
     def new(self, element_type, **kwargs):
         """
         Add a new element of type ``element_type`` or a raw html element with ``element_type`` tag.
@@ -824,3 +833,10 @@ class Icon(Element):
 
 class Inline(Text):
     allow_children = True
+
+
+class Markdown(Element):
+    allow_children = False
+
+    def _init(self, source):
+        self.update_props({'source': source}, override=False)

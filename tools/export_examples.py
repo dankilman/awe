@@ -60,6 +60,9 @@ examples = {
     },
     'chart_flat': {
         'terminate_after': 60,
+    },
+    'markdown': {
+        'screenshot': [195, 0, 195 + 1210, 200]
     }
 }
 
