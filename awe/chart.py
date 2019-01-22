@@ -1,6 +1,6 @@
 import time
 
-from .view import Element
+from .view import Element, builtin
 
 number_types = (int, float)
 to_ms = (lambda s: int(s * 1000))
@@ -215,12 +215,13 @@ transformer_classes = {t.key: t for t in [
 ]}
 
 
+@builtin
 class Chart(Element):
 
     allow_children = False
     transformer = None
 
-    def _init(self, data, options, transform, moving_window):
+    def _init(self, data=None, options=None, transform=None, moving_window=None):
         self.transformer = self._get_transformer(transform)
         self.update_data({
             'data': self.transformer.transform(data),

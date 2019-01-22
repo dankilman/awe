@@ -23,7 +23,7 @@ class Registry(object):
         return {k: var.get_variable() for k, var in self.variables.items()}
 
     def get_roots(self):
-        return {k: [t._get_view() for t in root.children] for k, root in self.roots.items()}
+        return {k: root._get_view() for k, root in self.roots.items()}
 
     def _get_id_and_store(self, obj, obj_id):
         obj_id = obj_id or getattr(obj, 'id', str(id(obj)))

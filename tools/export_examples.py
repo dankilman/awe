@@ -48,7 +48,7 @@ examples = {
     'showcase': {
         'screenshot': [195, 0, 195 + 1210, 510]
     },
-    'kitchen': {
+    'dsl': {
         'terminate_after': 60,
     },
     'page_properties': {

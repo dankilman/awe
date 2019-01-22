@@ -11,3 +11,4 @@ API
     collapse
     decorators
     custom
+    dsl

@@ -108,7 +108,7 @@ The [examples](#examples) section can be used as reference for the different ele
 {{ example('simple_report', 'png') }}
 {{ example('markdown', 'png') }}
 {{ example('showcase', 'png') }}
-{{ example('kitchen') }}
+{{ example('dsl') }}
 
 ## Supported Python Versions
 Tested on Python 2.7.15 and 3.7.1

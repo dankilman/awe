@@ -578,9 +578,13 @@ if __name__ == '__main__':
  ```
 ![image](https://s3.amazonaws.com/awe-static-files/examples/showcase.png)
 
-### [kitchen.py](examples/kitchen.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/kitchen.html))
+### [dsl.py](examples/dsl.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/dsl.html))
 
-A page that showcases many different element types supported by `awe`.
+A page that demonstrates how to use the element DSL by calling the `new()` method with a DSL definition.
+This example calls `new()` on the `page` instance, but in general, each element exposes the same functionally,
+so complex element hierarchies can be added below it using different DSL definitions.
+
+It also showcases many different element types supported by `awe`.
 
 The following element types are used:
 
@@ -596,76 +600,59 @@ Element data is updated using API exposed by each element type.
 In addition, the `divider` element is updated using the lower level `element.update_prop()` method which updates
 the underlying props of the react component.
 
+For more information on `awe`'s DSL, please refer to [DSL](https://awe-pages.readthedocs.io/en/latest/dsl.html).
+
 ```python
 import time
 
 from awe import Page
 
 
-class Kitchen(object):
-    def __init__(self, parent):
-        self.tabs = parent.new_tabs()
-        self.tab1 = Tab1(self.tabs)
-        self.tab2 = Tab2(self.tabs)
-
-    def update(self, i):
-        self.tab1.update(i)
-        self.tab2.update(i)
-
-
-class Tab1(object):
-    def __init__(self, parent):
-        self.tab = parent.new_tab('Tab 1')
-        self.grid = Grid(self.tab)
-        self.divider = self.tab.new_divider()
-        self.divider2 = self.tab.new_divider()
-        self.table2 = self.tab.new_table(headers=['c 4', 'c 5'], page_size=5)
-
-    def update(self, i):
-        self.divider.update_prop('dashed', not self.divider.props.get('dashed'))
-        self.table2.prepend([-i, -i * 12])
-        self.grid.update(i)
-
-
-class Grid(object):
-    def __init__(self, parent):
-        self.grid = parent.new_grid(columns=3)
-        self.table1 = self.grid.new_table(headers=['c 1', 'c 2', 'c 3'], cols=2, page_size=5)
-        self.cc = self.grid.new_card()
-        self.cc_inner = self.cc.new_card('inner')
-        self.ct = self.grid.new_card()
-        self.t1 = self.ct.new_text('4 Text')
-        self.t2 = self.ct.new_text('4 Text 2')
-        self.card = self.grid.new_card('0 Time')
-        self.card2 = self.grid.new_card('6')
-        self.card3 = self.grid.new_card('7', cols=3)
-
-    def update(self, i):
-        self.table1.append([i, i ** 2, i ** 3])
-        self.card.text = '{} Time: {}'.format(i, time.time())
-        self.t1.text = '4 Text: {}'.format(i * 3)
-        self.t2.text = '4 Text {}'.format(i * 4)
+page_layout = '''
+Tabs:
+- Tab:
+  - [name: Tab 1]
+  - Grid:
+    - [columns: 3]
+    - Table: [[table1, headers: [c 1, c 2, c 3], cols: 2, page_size: 5]]
+    - Card:
+      - Card: inner
+    - Card:
+      - Text: [[t1, text: 4 Text]]
+      - Text: [[t2, text: 4 Text 2]]
+    - Card: [[card1] ,0 Time]
+    - Card: '6'
+    - Card: [[cols: 3], '7']
+  - Divider: [[divider1]]
+  - Divider
+  - Table: [[table2, headers: [c 4, c 5], page_size: 5]]
+- Tab:
+  - [name: Tab 2]
+  - Table: [[table3, headers: [c 6, c 7, c 8], page_size: 5]]
+  - Table: [[table4, headers: [c 2, c 5], page_size: 5]]
+'''
 
 
-class Tab2(object):
-    def __init__(self, parent):
-        self.tab = parent.new_tab('Tab 2')
-        self.table3 = self.tab.new_table(headers=['c 6', 'c 7', 'c 8'], page_size=5)
-        self.table4 = self.tab.new_table(headers=['c 2', 'c 5'], page_size=5)
-
-    def update(self, i):
-        self.table3.append([-i, -i ** 2, -i ** 3])
-        self.table4.append([i, i * 12])
+def run():
+    page = Page()
+    content = page.new(page_layout)
+    ref = content.ref
+    page.start(develop=True)
+    for i in range(1000):
+        ref.table1.append([i, i ** 2, i ** 3])
+        ref.card1.text = '{} Time: {}'.format(i, time.time())
+        ref.t1.text = '4 Text: {}'.format(i * 3)
+        ref.t2.text = '4 Text {}'.format(i * 4)
+        ref.divider1.update_prop('dashed', not ref.divider1.props.get('dashed'))
+        ref.table2.prepend([-i, -i * 12])
+        ref.table3.append([-i, -i ** 2, -i ** 3])
+        ref.table4.append([i, i * 12])
+        time.sleep(5)
 
 
 def main():
-    page = Page()
-    kitchen = Kitchen(page)
-    page.start()
     try:
-        for i in range(1000):
-            kitchen.update(i)
-            time.sleep(5)
+        run()
     except KeyboardInterrupt:
         pass
 
@@ -674,7 +661,7 @@ if __name__ == '__main__':
     main()
 
  ```
-![image](https://s3.amazonaws.com/awe-static-files/examples/kitchen.gif)
+![image](https://s3.amazonaws.com/awe-static-files/examples/dsl.gif)
 
 
 ## Supported Python Versions

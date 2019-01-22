@@ -10,6 +10,7 @@ from . import webserver
 from . import websocket
 from . import export
 from . import custom
+from . import parser
 
 page = None
 
@@ -43,6 +44,9 @@ class Page(view.Root):
         self._port = port
         self._title = title
         self._style = self._set_default_style(style, width)
+        self._parser = parser.Parser(
+            registry=self._registry
+        )
         self._encoder = encoding.Encoder(
             element_cls=view.Element,
             serializers=serializers
@@ -147,6 +151,9 @@ class Page(view.Root):
             return
         action['version'] = self._version
         self._ws_server.dispatch_from_thread(action, client_id)
+
+    def _parse(self, obj):
+        return self._parser.parse(obj)
 
     @staticmethod
     def _set_default_style(style, width):

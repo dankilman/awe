@@ -6,6 +6,14 @@ from typing import List  # noqa
 from . import variables
 
 
+builtin_element_types = {}
+
+
+def builtin(cls):
+    builtin_element_types[cls.__name__] = cls
+    return cls
+
+
 class Element(object):
 
     allow_children = True
@@ -19,6 +27,7 @@ class Element(object):
         self.parent = parent  # type: Element
         self.index = len(parent.children) + 1 if isinstance(parent, Element) else 0
         self.children = []  # type: List[Element]
+        self.ref = Ref()
         self.data = {}
         self.props = props or {}
         self.props['key'] = self.id
@@ -214,7 +223,7 @@ class Element(object):
         """
         return self._new_child(Markdown, source=source, **kwargs)
 
-    def new_prop(self, prop):
+    def new_prop(self, prop, root=None):
         """
         Create a new element based prop.
 
@@ -231,12 +240,13 @@ class Element(object):
         created with a previous ``new_prop`` call.
 
         :param prop: The prop name.
+        :param root: Optionally, use a root element built using the element builder
         :return: The created element based prop.
         """
         assert self.parent
         assert prop not in self.props
         assert prop not in self._prop_children
-        result = self._new_root()
+        result = root or self._new_root()
         self._prop_children[prop] = result.id
         if self._init_complete:
             self._dispatch({
@@ -248,22 +258,27 @@ class Element(object):
             })
         return result
 
-    def new(self, element_type, **kwargs):
+    def new(self, obj, **kwargs):
         """
-        Add a new element of type ``element_type`` or a raw html element with ``element_type`` tag.
+        This method can return different results depending on ``obj`` type.
 
-        Note that this method is mostly useful for creating raw html elements or in combination with custom element
-        implementations.
-        Although, you can use it to create new elements of any type instead of using the regular ``new_XXX`` method.
+        If ``obj`` is a class that inherits from Element, a new element of that type will be created.
+        If ``obj`` is a dict or list, it will be parsed and the parser result will be created.
+        If ``obj`` is a string, it will be yaml loaded that result will be passed to the parser.
 
-        :param element_type: The ``Element`` subclass or a string name of a raw html tag.
-        :param kwargs: Arguments that should be passed to the ``_init`` method of the element or one of
-                       ``props``, ``style``, ``id`` in case ``element_type`` is an element class.
+        :param obj: The ``Element`` subclass, a dict/list or a string to be passed to the parser.
+        :param kwargs: Arguments that should be passed to the ``_init`` method of the created element or one of
+                       ``props``, ``style``, ``id`` if valid (result is not a raw html element).
         :return: The created element.
         """
-        if CustomElement._is_custom(element_type) and not element_type._registered:
-            self.register(element_type)
-        return self._new_child(element_type, **kwargs)
+        from . import parser
+        if CustomElement._is_custom(obj) and not obj._registered:
+            self.register(obj)
+        if parser.is_parsable(obj):
+            element_configuration = self._parse(obj)
+            return self._new_children(element_configuration, **kwargs)
+        else:
+            return self._new_child(obj, **kwargs)
 
     def register(self, custom_element_cls):
         """
@@ -301,8 +316,6 @@ class Element(object):
         :param data: The data to update.
         """
         self.data.update(data)
-        if not self._init_complete:
-            return
         self.update_element(path=['data'], action='set', data=self.data)
 
     def update_props(self, props, override=True):
@@ -318,8 +331,6 @@ class Element(object):
         if not override:
             final_props = {k: v for k, v in props.items() if k not in self.props}
         self.props.update(final_props)
-        if not self._init_complete:
-            return
         self.update_element(path=['props'], action='set', data=self.props)
 
     def update_prop(self, path, value):
@@ -335,8 +346,6 @@ class Element(object):
         if isinstance(path, str):
             path = [path]
         pydash.set_(self.props, path, value)
-        if not self._init_complete:
-            return
         self.update_element(path=['props'] + path, action='set', data=value)
 
     def update_element(self, path, action, data):
@@ -344,6 +353,8 @@ class Element(object):
         Very low level method that dispatches an ``updateElement`` action to the react application running the page.
         Usually preceded by an internal element data update.
         """
+        if not self._init_complete:
+            return
         assert not self._removed
         self._dispatch({
             'type': 'updatePath',
@@ -414,6 +425,44 @@ class Element(object):
             'propChildren': self._prop_children
         }
 
+    def _new_children(self, element_configuration, **kwargs):
+        element_configuration['kwargs'].update(kwargs)
+        roots = {}
+        fields = {}
+
+        def process(parent, conf):
+            element_type = conf['element_type']
+            kw = conf['kwargs']
+            kw_children = conf['kwargs_children']
+            prop_children = conf['prop_children']
+            children = conf['children']
+            field = conf['field']
+            for kw_child in kw_children:
+                kw_root = self._new_root()
+                roots[kw_root.id] = kw_root
+                kw[kw_child] = process(kw_root, kw[kw_child])
+            element = parent._new_child(element_type, _awe_skip_dispatch=True, **kw)
+            if field:
+                fields[field] = element
+            for prop, prop_child_conf in prop_children.items():
+                prop_root = self._new_root()
+                roots[prop_root.id] = prop_root
+                process(prop_root, prop_child_conf)
+                element._prop_children[prop] = prop_root.id
+            for child_conf in children:
+                process(element, child_conf)
+            return element
+
+        top_level = process(self, element_configuration)
+        top_level.ref.refs.update(fields)
+        dispatch_roots = {k: root._get_view() for k, root in roots.items()}
+        dispatch_roots['root'] = [top_level._get_view()]
+        self._dispatch({
+            'type': 'processRoots',
+            'roots': dispatch_roots
+        })
+        return top_level
+
     def _new_child(self, element_type, **kwargs):
         assert self.allow_children
         assert not self._removed
@@ -421,9 +470,9 @@ class Element(object):
         props = kwargs.pop('props', None)
         style = kwargs.pop('style', None)
         element_id = kwargs.pop('id', None)
-        if isinstance(element_type, str):
-            kwargs['tag'] = element_type
-            element_type = Raw
+        skip_dispatch = kwargs.pop('_awe_skip_dispatch', None)
+        arg = kwargs.pop('_awe_arg', None)
+        args = [arg] if arg else []
         # type: Element
         result = element_type(
             root=self.root,
@@ -434,10 +483,11 @@ class Element(object):
             stack=self._stack,
         )
         self._register(result)
-        result._init(**kwargs)
+        result._init(*args, **kwargs)
         result._init_complete = True
         self.children.append(result)
-        self._dispatch(result._get_new_element_action())
+        if not skip_dispatch:
+            self._dispatch(result._get_new_element_action())
         return result
 
     def _remove_child(self, element):
@@ -495,6 +545,9 @@ class Element(object):
     def _increase_version(self):
         self.root._increase_version()
 
+    def _parse(self, obj):
+        return self.root._parse(obj)
+
     def _stack_stash(self):
         self._stack.append(self)
         return self
@@ -519,6 +572,9 @@ class Root(Element):
         )
         self._owner = owner  # type: Element
 
+    def _get_view(self):
+        return [t._get_view() for t in self.children]
+
     def _increase_version(self):
         self._owner._increase_version()
 
@@ -530,6 +586,9 @@ class Root(Element):
 
     def _dispatch(self, action, client_id=None):
         self._owner._dispatch(action)
+
+    def _parse(self, obj):
+        return self._owner._parse(obj)
 
 
 class ElementBuilder(object):
@@ -544,6 +603,15 @@ class ElementBuilder(object):
     def __getattr__(self, item):
         root = self._owner._new_root()
         return getattr(root, 'new_{}'.format(item))
+
+
+class Ref(object):
+
+    def __init__(self):
+        self.refs = {}
+
+    def __getattr__(self, item):
+        return self.refs.get(item)
 
 
 class CustomElement(Element):
@@ -575,6 +643,7 @@ class Raw(Element):
         self.update_data({'tag': tag})
 
 
+@builtin
 class Grid(Element):
 
     def _init(self, columns):
@@ -584,14 +653,17 @@ class Grid(Element):
     def _new_child(self, cls, **kwargs):
         columns = kwargs.pop('cols', 1)
         self.data['childColumns'].append(columns)
-        self.update_element(['data', 'childColumns'], action='append', data=columns)
+        if not kwargs.get('_awe_skip_dispatch'):
+            self.update_element(['data', 'childColumns'], action='append', data=columns)
         return super(Grid, self)._new_child(cls, **kwargs)
 
 
+@builtin
 class Divider(Element):
     allow_children = False
 
 
+@builtin
 class Collapse(Element):
 
     def _init(self):
@@ -620,21 +692,28 @@ class Collapse(Element):
         return result
 
 
+@builtin
 class Panel(Element):
 
     def _init(self, header):
         if header:
+            if isinstance(header, Element):
+                assert header.root_id != self.root_id
+                header = header.root
+                self.new_prop('header', header)
+            else:
+                self.update_props({'header': header}, override=False)
             self.header = header
-            self.update_props({'header': header}, override=False)
         else:
             self.header = self.new_prop('header')
 
 
+@builtin
 class Text(Element):
 
     allow_children = False
 
-    def _init(self, text):
+    def _init(self, text=''):
         self.text = text
 
     @property
@@ -656,15 +735,17 @@ class Text(Element):
         self.update_data({'text': value or ''})
 
 
+@builtin
 class Card(Text):
     allow_children = True
 
 
+@builtin
 class Table(Element):
 
     allow_children = False
 
-    def _init(self, headers, page_size):
+    def _init(self, headers, page_size=None):
         if isinstance(headers, dict):
             headers = list(headers.keys())
         self.update_data({'headers': headers, 'rows': deque()})
@@ -731,11 +812,12 @@ class Table(Element):
         return {'data': row, 'id': len(self.data['rows']) + 1 + offset}
 
 
+@builtin
 class Button(Element):
 
     allow_children = False
 
-    def _init(self, function, text, icon, shape, type, block):
+    def _init(self, function, text='', icon=None, shape=None, type='default', block=False):
         assert (not shape) or shape == 'circle'
         self._function = function
         self._register(function, self.id)
@@ -771,11 +853,12 @@ class Button(Element):
         self.update_data({'text': value})
 
 
+@builtin
 class Input(Element):
 
     allow_children = False
 
-    def _init(self, placeholder, on_enter):
+    def _init(self, placeholder=None, on_enter=None):
         self._on_enter = on_enter
         self._variable = self._new_variable('', self.id)
         if placeholder:
@@ -793,6 +876,7 @@ class Input(Element):
         return result
 
 
+@builtin
 class Tabs(Element):
 
     def _init(self):
@@ -812,15 +896,17 @@ class Tabs(Element):
         return self._new_child(Tab, name=name, **kwargs)
 
 
+@builtin
 class Tab(Element):
 
     def _init(self, name):
         self.update_props({'tab': name}, override=False)
 
 
+@builtin
 class Icon(Element):
 
-    def _init(self, type, theme, spin, two_tone_color):
+    def _init(self, type, theme='outlined', spin=False, two_tone_color=None):
         assert theme in ['outlined', 'filled', 'twoTone']
         assert (not two_tone_color) or theme == 'twoTone'
         self.update_props({
@@ -831,10 +917,12 @@ class Icon(Element):
         }, override=False)
 
 
+@builtin
 class Inline(Text):
     allow_children = True
 
 
+@builtin
 class Markdown(Element):
     allow_children = False
 

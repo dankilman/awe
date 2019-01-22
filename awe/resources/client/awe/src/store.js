@@ -83,6 +83,12 @@ function processInitialState(state, {style, variables, roots}) {
     for (const variable of Object.values(variables)) {
       map = newVariable(map, variable)
     }
+    return processRoots(map, {roots});
+  });
+}
+
+function processRoots(state, {roots}) {
+  return state.withMutations(map => {
     for (const [rootId, children] of Object.entries(roots)) {
       for (const child of children) {
         map = processElement(map, child, rootId);
@@ -165,6 +171,7 @@ function reload(state) {
 
 const reducers = {
   processInitialState,
+  processRoots,
   newElement,
   newPropChild,
   removeElements,
