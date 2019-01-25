@@ -3,6 +3,7 @@ import copy
 import mock
 import pytest
 
+from awe import Page
 from awe import chart
 
 
@@ -251,3 +252,18 @@ def test_dict_level_transformer_timed_tuples():
     transformer = chart.DictLevelsTransformer.from_str('1to2')
     transform = transformer.transform([(ts, {'c': {'d': 1234}})])
     assert transform == {'c': {'series': [{'data': [(expected_ts, 1234)], 'name': 'd'}], 'title': 'c', 'type': 'line'}}
+
+
+def test_transform_getter_and_setter():
+    page = Page()
+    c = page.new_chart()
+    assert isinstance(c.transformer, chart.NoOpTransformer)
+    c.transformer = '1to2'
+    assert isinstance(c.transformer, chart.DictLevelsTransformer)
+    c.transformer = 'numbers'
+    assert isinstance(c.transformer, chart.NumberSequenceTransformer)
+    numbers = chart.NumberSequenceTransformer()
+    c.transformer = numbers
+    assert c.transformer is numbers
+    c.transformer = {'type': 'flat', 'chart_mapping': [], 'series_mapping': [], 'value_key': ''}
+    assert isinstance(c.transformer, chart.FlatDictTransformer)

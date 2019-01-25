@@ -1,4 +1,5 @@
 from awe import view
+from awe import chart
 from awe import parser
 from awe import Page
 
@@ -203,3 +204,9 @@ def test_text_child():
         - Card Text
     ''')
     assert result.children[0].text == 'Card Text'
+
+
+def test_chart():
+    page = Page()
+    c = page.new('Chart')
+    assert isinstance(c, chart.Chart)

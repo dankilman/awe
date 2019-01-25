@@ -219,10 +219,10 @@ transformer_classes = {t.key: t for t in [
 class Chart(Element):
 
     allow_children = False
-    transformer = None
+    _transformer = None
 
     def _init(self, data=None, options=None, transform=None, moving_window=None):
-        self.transformer = self._get_transformer(transform)
+        self.transformer = transform
         self.update_data({
             'data': self.transformer.transform(data),
             'options': options or {},
@@ -244,6 +244,20 @@ class Chart(Element):
             action='addChartData',
             data=transformed_data
         )
+
+    @property
+    def transformer(self):
+        """
+        :return: The currently set transformer.
+        """
+        return self._transformer
+
+    @transformer.setter
+    def transformer(self, value):
+        """
+        Sets the transformer for the chart.
+        """
+        self._transformer = self._get_transformer(value)
 
     @staticmethod
     def _get_transformer(transform):
