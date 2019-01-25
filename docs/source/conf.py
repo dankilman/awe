@@ -9,7 +9,7 @@ html_theme_options = {
     'github_user': 'dankilman',
     'github_repo': project,
     'fixed_sidebar': True,
-    'page_width': '1000px',
+    'page_width': '1200px',
 }
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'

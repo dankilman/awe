@@ -1,8 +1,9 @@
-API
-===
+Documentation
+=============
 
 .. toctree::
 
+    getting_started
     basic
     page
     table
@@ -12,3 +13,5 @@ API
     decorators
     custom
     dsl
+    export
+
