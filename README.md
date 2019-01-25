@@ -618,9 +618,9 @@ Tabs:
     - Card:
       - Card: inner
     - Card:
-      - Text: [[t1, text: 4 Text]]
-      - Text: [[t2, text: 4 Text 2]]
-    - Card: [[card1] ,0 Time]
+      - Text: [[text1, text: 4 Text]]
+      - Text: [[text2, text: 4 Text 2]]
+    - Card: [[card1], 0 Time]
     - Card: '6'
     - Card: [[cols: 3], '7']
   - Divider: [[divider1]]
@@ -637,16 +637,16 @@ def run():
     page = Page()
     content = page.new(page_layout)
     ref = content.ref
-    page.start(develop=True)
+    page.start()
     for i in range(1000):
         ref.table1.append([i, i ** 2, i ** 3])
-        ref.card1.text = '{} Time: {}'.format(i, time.time())
-        ref.t1.text = '4 Text: {}'.format(i * 3)
-        ref.t2.text = '4 Text {}'.format(i * 4)
-        ref.divider1.update_prop('dashed', not ref.divider1.props.get('dashed'))
         ref.table2.prepend([-i, -i * 12])
         ref.table3.append([-i, -i ** 2, -i ** 3])
         ref.table4.append([i, i * 12])
+        ref.text1.text = '4 Text: {}'.format(i * 3)
+        ref.text2.text = '4 Text {}'.format(i * 4)
+        ref.card1.children[0].text = '{} Time: {}'.format(i, time.time())
+        ref.divider1.update_prop('dashed', not ref.divider1.props.get('dashed'))
         time.sleep(5)
 
 
