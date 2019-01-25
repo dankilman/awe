@@ -193,5 +193,5 @@ DSL:
     page.new('''
         Collapse:
         - Panel:
-          - [header: {_: Inline: [Icon: up-circle, Inline: ' Panel 1']}]
+          - [header: {_: {Inline: [Icon: up-circle, Inline: ' Panel 1']}}]
     ''')
