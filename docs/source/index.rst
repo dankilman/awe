@@ -4,12 +4,7 @@ Documentation
 .. toctree::
 
     getting_started
-    basic
-    page
-    table
-    chart
-    tabs
-    collapse
+    elements
     decorators
     custom
     dsl

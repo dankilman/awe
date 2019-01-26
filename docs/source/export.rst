@@ -1,5 +1,5 @@
-Export To Static HTML
-=====================
+Export
+======
 
 At any point during the lifetime of a page you can export its current state to a standalone `html` file you can
 freely share.
