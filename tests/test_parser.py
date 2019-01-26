@@ -210,3 +210,10 @@ def test_chart():
     page = Page()
     c = page.new('Chart')
     assert isinstance(c, chart.Chart)
+
+
+def test_inputs():
+    page = Page()
+    fn = lambda: None
+    button = page.new('Button: [[function: {$: fn1}]]', inputs={'fn1': fn})
+    assert button._function is fn

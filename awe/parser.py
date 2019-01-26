@@ -11,18 +11,24 @@ SPECIAL_KWARGS_KEYS = {'id', 'cols'}
 _init_cache = {}
 
 
+class ParserContext(object):
+
+    def __init__(self, inputs):
+        self.inputs = inputs or {}
+
+
 class Parser(object):
 
     def __init__(self, registry):
         self.registry = registry
 
-    def parse(self, obj):
+    def parse(self, obj, context):
         obj = _prepare(obj)
         obj = self._normalize_element(obj)
-        element_configuration = self._parse_dict(obj)
+        element_configuration = self._parse_dict(obj, context)
         return element_configuration
 
-    def _parse_dict(self, obj):
+    def _parse_dict(self, obj, context):
         assert isinstance(obj, dict)
         assert len(obj) == 1
         element_configuration = {
@@ -48,18 +54,18 @@ class Parser(object):
         if not isinstance(value, list):
             raise ValueError('Value should be a string or a list, got: {}'.format(value))
         if value and isinstance(value[0], list):
-            self._parse_element_configuration(element_configuration, element_type, value[0])
+            self._parse_element_configuration(element_configuration, element_type, value[0], context)
             value = value[1:]
         for item in value:
             if isinstance(item, str) and not self._is_element_type(item):
                 item = {'Inline': item}
             else:
                 item = self._normalize_element(item)
-            child_element_configuration = self._parse_dict(item)
+            child_element_configuration = self._parse_dict(item, context)
             element_configuration['children'].append(child_element_configuration)
         return element_configuration
 
-    def _parse_element_configuration(self, result, element_type, configuration_items):
+    def _parse_element_configuration(self, result, element_type, configuration_items, context):
         if not configuration_items:
             return
         if not isinstance(configuration_items, list):
@@ -75,7 +81,9 @@ class Parser(object):
             if is_element_value:
                 value = value['_']
                 value = self._normalize_element(value)
-                value = self._parse_dict(value)
+                value = self._parse_dict(value, context)
+            if self._is_input(value):
+                value = context.inputs[value['$']]
             if key in SPECIAL_KWARGS_KEYS or key in self._get_init_args(element_type):
                 result['kwargs'][key] = value
                 if is_element_value:
@@ -101,9 +109,15 @@ class Parser(object):
             str_obj in view.builtin_element_types
         )
 
+    def _is_element_value(self, obj):
+        return self._is_intrinsic(obj, '_')
+
+    def _is_input(self, obj):
+        return self._is_intrinsic(obj, '$')
+
     @staticmethod
-    def _is_element_value(obj):
-        return isinstance(obj, dict) and len(obj) == 1 and bool(obj.get('_'))
+    def _is_intrinsic(obj, key):
+        return isinstance(obj, dict) and len(obj) == 1 and bool(obj.get(key))
 
     @staticmethod
     def _normalize_element(obj):

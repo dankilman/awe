@@ -195,3 +195,35 @@ DSL:
         - Panel:
           - [header: {_: {Inline: [Icon: up-circle, Inline: ' Panel 1']}}]
     ''')
+
+
+Inputs
+------
+
+Passing inputs that can be referenced in the DSL is supported by passing an additional ``inputs`` kwarg to the
+``new()`` method.
+
+In the DSL, reference the input using the intrinsic function ``{$: <INPUT_NAME>}``.
+
+Direct API:
+
+.. code-block:: python
+
+    def my_function():
+        print('Hello from my function')
+
+    button = page.new_button(my_function)
+
+DSL:
+
+.. code-block:: python
+
+    def my_function():
+        print('Hello from my function')
+
+    page.new('''
+        Button: [[function: {$: my_function}]]
+    ''', inputs={'my_function': my_function})
+
+.. note::
+    Currently, inputs can only be referenced in argument lists, but general support is planned.

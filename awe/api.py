@@ -152,8 +152,8 @@ class Page(view.Root):
         action['version'] = self._version
         self._ws_server.dispatch_from_thread(action, client_id)
 
-    def _parse(self, obj):
-        return self._parser.parse(obj)
+    def _parse(self, obj, context):
+        return self._parser.parse(obj, context)
 
     @staticmethod
     def _set_default_style(style, width):

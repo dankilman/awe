@@ -264,18 +264,22 @@ class Element(object):
 
         If ``obj`` is a class that inherits from Element, a new element of that type will be created.
         If ``obj`` is a dict or list, it will be parsed and the parser result will be created.
-        If ``obj`` is a string, it will be yaml loaded that result will be passed to the parser.
+        If ``obj`` is a string, it will be yaml loaded and that result will be passed to the parser.
+
+        When result is passed to the parser, an additional ``inputs`` argument can be supplied as a dict from keys
+        to values that are referenced in the DSL using the ``$`` intrinsic function.
 
         :param obj: The ``Element`` subclass, a dict/list or a string to be passed to the parser.
         :param kwargs: Arguments that should be passed to the ``_init`` method of the created element or one of
-                       ``props``, ``style``, ``id`` if valid (result is not a raw html element).
+                       ``props``, ``style``, ``id``, ``inputs`` if valid.
         :return: The created element.
         """
         from . import parser
         if CustomElement._is_custom(obj) and not obj._registered:
             self.register(obj)
         if parser.is_parsable(obj):
-            element_configuration = self._parse(obj)
+            context = parser.ParserContext(inputs=kwargs.pop('inputs', None))
+            element_configuration = self._parse(obj, context)
             return self._new_children(element_configuration, **kwargs)
         else:
             return self._new_child(obj, **kwargs)
@@ -545,8 +549,8 @@ class Element(object):
     def _increase_version(self):
         self.root._increase_version()
 
-    def _parse(self, obj):
-        return self.root._parse(obj)
+    def _parse(self, obj, context):
+        return self.root._parse(obj, context)
 
     def _stack_stash(self):
         self._stack.append(self)
@@ -587,8 +591,8 @@ class Root(Element):
     def _dispatch(self, action, client_id=None):
         self._owner._dispatch(action)
 
-    def _parse(self, obj):
-        return self._owner._parse(obj)
+    def _parse(self, obj, context):
+        return self._owner._parse(obj, context)
 
 
 class ElementBuilder(object):

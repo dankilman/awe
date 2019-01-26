@@ -147,8 +147,11 @@ def test_numbers_transformer_timed_tuples():
     ts = 1000.12
     expected_ts = int(ts * 1000)
     numbers = chart.NumberSequenceTransformer()
-    transform = numbers.transform([(ts, 1234)])
-    assert transform == {'': {'series': [{'data': [(expected_ts, 1234)], 'name': 1}], 'title': '', 'type': 'line'}}
+    for ds in [list, tuple]:
+        transform = numbers.transform([ds((ts, 1234))])
+        assert transform == {
+            '': {'series': [{'data': [(expected_ts, 1234)], 'name': 1}], 'title': '', 'type': 'line'}
+        }
 
 
 @mock.patch.object(chart, 'now_ms', lambda: 0)
@@ -192,8 +195,11 @@ def test_flat_transformer_timed_tuples():
     ts = 1000.12
     expected_ts = int(ts * 1000)
     numbers = chart.FlatDictTransformer(['a'], ['b'], 'c')
-    transform = numbers.transform([(ts, {'a': 'a', 'b': 'b', 'c': 1234})])
-    assert transform == {'a': {'series': [{'data': [(expected_ts, 1234)], 'name': 'b'}], 'title': 'a', 'type': 'line'}}
+    for ds in [list, tuple]:
+        transform = numbers.transform([ds((ts, {'a': 'a', 'b': 'b', 'c': 1234}))])
+        assert transform == {
+            'a': {'series': [{'data': [(expected_ts, 1234)], 'name': 'b'}], 'title': 'a', 'type': 'line'}
+        }
 
 
 @mock.patch.object(chart, 'now_ms', lambda: 0)
@@ -250,8 +256,11 @@ def test_dict_level_transformer_timed_tuples():
     ts = 1000.12
     expected_ts = int(ts * 1000)
     transformer = chart.DictLevelsTransformer.from_str('1to2')
-    transform = transformer.transform([(ts, {'c': {'d': 1234}})])
-    assert transform == {'c': {'series': [{'data': [(expected_ts, 1234)], 'name': 'd'}], 'title': 'c', 'type': 'line'}}
+    for ds in [list, tuple]:
+        transform = transformer.transform([ds((ts, {'c': {'d': 1234}}))])
+        assert transform == {
+            'c': {'series': [{'data': [(expected_ts, 1234)], 'name': 'd'}], 'title': 'c', 'type': 'line'}
+        }
 
 
 def test_transform_getter_and_setter():
