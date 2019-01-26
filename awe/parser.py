@@ -25,10 +25,11 @@ class Parser(object):
     def parse(self, obj, context):
         obj = _prepare(obj)
         obj = self._normalize_element(obj)
-        element_configuration = self._parse_dict(obj, context)
+        obj = self._process_intrinsic_functions(obj, context)
+        element_configuration = self._parse_dict(obj)
         return element_configuration
 
-    def _parse_dict(self, obj, context):
+    def _parse_dict(self, obj):
         assert isinstance(obj, dict)
         assert len(obj) == 1
         element_configuration = {
@@ -54,18 +55,18 @@ class Parser(object):
         if not isinstance(value, list):
             raise ValueError('Value should be a string or a list, got: {}'.format(value))
         if value and isinstance(value[0], list):
-            self._parse_element_configuration(element_configuration, element_type, value[0], context)
+            self._parse_element_configuration(element_configuration, element_type, value[0])
             value = value[1:]
         for item in value:
             if isinstance(item, str) and not self._is_element_type(item):
                 item = {'Inline': item}
             else:
                 item = self._normalize_element(item)
-            child_element_configuration = self._parse_dict(item, context)
+            child_element_configuration = self._parse_dict(item)
             element_configuration['children'].append(child_element_configuration)
         return element_configuration
 
-    def _parse_element_configuration(self, result, element_type, configuration_items, context):
+    def _parse_element_configuration(self, result, element_type, configuration_items):
         if not configuration_items:
             return
         if not isinstance(configuration_items, list):
@@ -77,13 +78,11 @@ class Parser(object):
             assert isinstance(item, dict)
             assert len(item) == 1
             key, value = list(item.items())[0]
-            is_element_value = self._is_element_value(value)
+            is_element_value = self._is_intrinsic(value, '_')
             if is_element_value:
                 value = value['_']
                 value = self._normalize_element(value)
-                value = self._parse_dict(value, context)
-            if self._is_input(value):
-                value = context.inputs[value['$']]
+                value = self._parse_dict(value)
             if key in SPECIAL_KWARGS_KEYS or key in self._get_init_args(element_type):
                 result['kwargs'][key] = value
                 if is_element_value:
@@ -109,15 +108,40 @@ class Parser(object):
             str_obj in view.builtin_element_types
         )
 
-    def _is_element_value(self, obj):
-        return self._is_intrinsic(obj, '_')
-
-    def _is_input(self, obj):
-        return self._is_intrinsic(obj, '$')
-
     @staticmethod
     def _is_intrinsic(obj, key):
         return isinstance(obj, dict) and len(obj) == 1 and bool(obj.get(key))
+
+    def _process_input(self, node, context):
+        input_node = self._process_intrinsic_functions(node['$'], context)
+        if isinstance(input_node, str):
+            input_node = [input_node]
+        input_name = input_node[0]
+        input_node = input_node[1:]
+        default_value = None
+        for entry in input_node:
+            assert isinstance(entry, dict)
+            assert len(entry) == 1
+            key, value = list(entry.items())[0]
+            if key == 'default':
+                default_value = value
+            else:
+                raise ValueError('Unknown config option: {}'.format(key))
+        if default_value:
+            return context.inputs.get(input_name, default_value)
+        else:
+            return context.inputs[input_name]
+
+    def _process_intrinsic_functions(self, obj, context):
+        def process(node):
+            if isinstance(node, dict):
+                if self._is_intrinsic(node, '$'):
+                    return self._process_input(node, context)
+                return {k: process(v) for k, v in node.items()}
+            elif isinstance(node, list):
+                return [process(item) for item in node]
+            return node
+        return process(obj)
 
     @staticmethod
     def _normalize_element(obj):

@@ -215,5 +215,28 @@ def test_chart():
 def test_inputs():
     page = Page()
     fn = lambda: None
-    button = page.new('Button: [[function: {$: fn1}]]', inputs={'fn1': fn})
-    assert button._function is fn
+    text1 = 'Text Input 1'
+    text2 = 'Text Input 2'
+    input3 = 'Input 3 Value'
+    inputs = {
+        'fn1': fn,
+        'text1': text1,
+        'text2': text2,
+        'input3': input3
+    }
+    layout = '''
+        - Button: [[button1, function: {$: fn1}]]
+        - Text: {$: text1}
+        - Inline:
+          - [text2]
+          - {$: text2}
+        - Inline:
+          - [text3]
+          - {$: [text3, default: {$: input3}]}
+    '''
+    top_level = page.new(layout, inputs=inputs)
+    ref = top_level.ref
+    assert top_level.children[1].text == text1
+    assert ref.button1._function is fn
+    assert ref.text2.children[0].text == text2
+    assert ref.text3.children[0].text == input3

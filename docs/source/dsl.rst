@@ -224,6 +224,3 @@ DSL:
     page.new('''
         Button: [[function: {$: my_function}]]
     ''', inputs={'my_function': my_function})
-
-.. note::
-    Currently, inputs can only be referenced in argument lists, but general support is planned.
