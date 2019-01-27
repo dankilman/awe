@@ -511,6 +511,38 @@ if __name__ == '__main__':
  ```
 ![image](https://s3.amazonaws.com/awe-static-files/examples/showcase.png)
 
+### [updater.py](examples/updater.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/updater.html))
+
+A page that demonstrates how to use the asynchronous updater to update created elements in the background.
+
+```python
+import random
+import time
+
+
+from awe import Page
+
+
+def updater(card):
+    while True:
+        card.text = 'Got {}'.format(random.randint(1, 100))
+        time.sleep(0.1 + random.random())
+
+
+def main():
+    page = Page()
+    grid = page.new_grid(columns=3)
+    for _ in range(3):
+        grid.new_card(updater=updater)
+    page.start(block=True)
+
+
+if __name__ == '__main__':
+    main()
+
+ ```
+![image](https://s3.amazonaws.com/awe-static-files/examples/updater.gif)
+
 ### [dsl.py](examples/dsl.py) ([static demo](https://s3.amazonaws.com/awe-static-files/examples/dsl.html))
 
 A page that demonstrates how to use the element DSL by calling the `new()` method with a DSL definition.

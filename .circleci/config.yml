@@ -36,6 +36,10 @@ commands:
     - run:
         name: check isolated dist package
         command: source test-env/bin/activate && cd test-env && python -c 'import awe; awe.Page()'
+
+  artifacts:
+    description: collect actifacts
+    steps:
     - store_artifacts:
         path: test-reports
     - store_test_results:
@@ -47,11 +51,16 @@ jobs:
     - image: circleci/python:2.7-stretch-node-browsers
     steps:
     - build-and-test
+    - artifacts
   build37:
     docker:
     - image: circleci/python:3.7-stretch-node-browsers
     steps:
     - build-and-test
+    - run:
+        name: make pytest3
+        command: source test-env/bin/activate && make pytest3
+    - artifacts
 
 workflows:
   version: 2

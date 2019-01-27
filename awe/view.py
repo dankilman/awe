@@ -4,6 +4,7 @@ import pydash
 from typing import List  # noqa
 
 from . import variables
+from . import element_updater
 
 
 builtin_element_types = {}
@@ -474,6 +475,7 @@ class Element(object):
         props = kwargs.pop('props', None)
         style = kwargs.pop('style', None)
         element_id = kwargs.pop('id', None)
+        updater = kwargs.pop('updater', None)
         skip_dispatch = kwargs.pop('_awe_skip_dispatch', None)
         arg = kwargs.pop('_awe_arg', None)
         args = [arg] if arg else []
@@ -488,6 +490,11 @@ class Element(object):
         )
         self._register(result)
         result._init(*args, **kwargs)
+        if updater:
+            self._register(element_updater.Updater(
+                element=result,
+                updater=updater
+            ))
         result._init_complete = True
         self.children.append(result)
         if not skip_dispatch:

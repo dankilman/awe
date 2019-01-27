@@ -17,7 +17,17 @@ flake8:
 	flake8 awe
 
 pytest:
-	pytest --forked --junit-xml=test-reports/pytest/report.xml tests
+	pytest \
+	    --forked \
+	    --ignore=tests/py3 \
+	    --junit-xml=test-reports/pytest/report.xml \
+	    tests
+
+pytest3:
+	pytest \
+	    --forked \
+	    --junit-xml=test-reports/pytest/report2.xml \
+	    tests/py3
 
 build: clean build-client build-package update-readme
 

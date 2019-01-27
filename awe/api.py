@@ -11,6 +11,7 @@ from . import websocket
 from . import export
 from . import custom
 from . import parser
+from . import element_updater
 
 page = None
 
@@ -44,6 +45,7 @@ class Page(view.Root):
         self._port = port
         self._title = title
         self._style = self._set_default_style(style, width)
+        self._element_updater = element_updater.ElementUpdater()
         self._parser = parser.Parser(
             registry=self._registry
         )
@@ -94,6 +96,7 @@ class Page(view.Root):
         self._message_handler.start()
         self._server.start()
         self._ws_server.start()
+        self._element_updater.start()
         self._started = True
         if open_browser:
             port = 3000 if (develop or os.environ.get('AWE_DEVELOP')) else self._port
@@ -138,7 +141,10 @@ class Page(view.Root):
         self._version += 1
 
     def _register(self, obj, obj_id=None):
-        self._registry.register(obj, obj_id)
+        if isinstance(obj, element_updater.Updater):
+            self._element_updater.add(obj)
+        else:
+            self._registry.register(obj, obj_id)
 
     def _unregister(self, obj, obj_id=None):
         self._registry.unregister(obj, obj_id)

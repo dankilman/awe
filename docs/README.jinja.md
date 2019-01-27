@@ -41,6 +41,7 @@ pip install awe
 {{ example('simple_report', 'png') }}
 {{ example('markdown', 'png') }}
 {{ example('showcase', 'png') }}
+{{ example('updater') }}
 {{ example('dsl') }}
 
 ## Credits

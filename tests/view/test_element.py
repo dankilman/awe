@@ -134,3 +134,41 @@ def test_remove(element_tester):
         lambda _: state['card1'].remove(),
         verify_no_elements(['card1', 'text3']),
     )
+
+
+def test_element_updater(element_tester):
+    text1_class = 'text1'
+    text2_class = 'text2'
+    new_text1 = 'This is the new text'
+    new_text2 = 'This is the other new text'
+
+    def builder(page):
+        def update_text(text):
+            text.text = new_text1
+        page.new_text(
+            'no_update_yet',
+            updater=update_text,
+            props={'className': text1_class}
+        )
+
+    def finder(driver):
+        assert driver.find_element_by_class_name(text1_class).text == new_text1
+
+    def add_updater(page):
+        def update_text(text):
+            text.text = new_text2
+        page.new_text(
+            'no_update_yet',
+            updater=update_text,
+            props={'className': text2_class}
+        )
+
+    def verify_updater(driver):
+        assert driver.find_element_by_class_name(text2_class).text == new_text2
+
+    element_tester(
+        builder,
+        finder,
+        add_updater,
+        verify_updater
+    )

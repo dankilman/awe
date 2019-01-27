@@ -63,6 +63,9 @@ examples = {
     },
     'markdown': {
         'screenshot': [195, 0, 195 + 1210, 210]
+    },
+    'updater': {
+        'terminate_after': 3,
     }
 }
 
