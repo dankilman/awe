@@ -91,7 +91,10 @@ class Page(view.Root):
         :param develop: During development, changes to port for open browser to ``3000``.
                (due to npm start, default ``False``)
         """
+        if self._started:
+            return
         if self._offline:
+            self._element_updater.start()
             return
         self._message_handler.start()
         self._server.start()
