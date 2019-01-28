@@ -6,7 +6,7 @@ import yaml
 from . import view
 
 
-SPECIAL_KWARGS_KEYS = {'id', 'cols'}
+SPECIAL_KWARGS_KEYS = {'id', 'cols', 'updater'}
 
 _init_cache = {}
 

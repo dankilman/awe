@@ -138,6 +138,15 @@ def test_parse_element_configuration_cols():
     assert result.data['childColumns'] == [2]
 
 
+def test_parse_element_configuration_updater():
+    page = Page()
+    page.new('''
+        Text:
+        - [updater: {$: fn}]
+    ''', inputs={'fn': lambda: None})
+    assert page._element_updater.threads
+
+
 def test_parse_element_configuration_init_arg():
     page = Page()
     result = page.new('''
