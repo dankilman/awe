@@ -15,6 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image
 
 from awe import api
+import examples
 
 
 @click.group()
@@ -24,50 +25,6 @@ def cli():
 
 base_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 output_examples_dir = os.path.join(base_dir, 'published-examples')
-
-examples = {
-    'hello_world': {
-        'screenshot': [195, 0, 195 + 300, 50]
-    },
-    'button_and_input': {},
-    'chart_simple': {
-        'terminate_after': 35,
-    },
-    'chart_complex': {
-        'terminate_after': 70,
-    },
-    'custom_element': {
-        'screenshot': [100, 0, 100 + 1000, 150]
-    },
-    'raw_html': {
-        'screenshot': [195, 0, 195 + 1210, 740]
-    },
-    'simple_report': {
-        'screenshot': [195, 0, 195 + 1210, 385]
-    },
-    'showcase': {
-        'screenshot': [195, 0, 195 + 1210, 510]
-    },
-    'dsl': {
-        'terminate_after': 60,
-    },
-    'page_properties': {
-        'screenshot': [190, 0, 195 + 1210, 85]
-    },
-    'standard_output': {},
-    'collapse': {
-        'screenshot': [195, 0, 195 + 1210, 210]
-    },
-    'chart_flat': {
-        'terminate_after': 60,
-    },
-    'markdown': {
-        'screenshot': [195, 0, 195 + 1210, 210]
-    },
-    'updater': {
-        'terminate_after': 3,
-    }
-}
 
 
 def export_setup():
@@ -82,7 +39,7 @@ def export_setup():
 @cli.command()
 def export_examples():
     export_setup()
-    for example, config in examples.items():
+    for example, config in examples.exported_examples.items():
         print('Processing {}, {}'.format(example, config))
         module = importlib.import_module('examples.{}'.format(example))
         thread = threading.Thread(target=module.main)
@@ -118,7 +75,7 @@ def _driver():
 @cli.command()
 def generate_screenshots():
     with _driver() as driver:
-        for example, config in examples.items():
+        for example, config in examples.exported_examples.items():
             screenshot = config.get('screenshot')
             if not screenshot:
                 continue

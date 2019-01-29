@@ -10,9 +10,6 @@ dev-client:
 build-package:
 	python setup.py bdist_wheel
 
-update-readme:
-	python tools/generate_readme.py
-
 flake8:
 	flake8 awe
 
@@ -29,7 +26,7 @@ pytest3:
 	    --junit-xml=test-reports/pytest/report2.xml \
 	    tests/py3
 
-build: clean build-client build-package update-readme
+build: clean build-client build-package
 
 test: flake8 pytest
 
