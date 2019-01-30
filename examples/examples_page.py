@@ -7,7 +7,7 @@ import examples
 class HighlightJS(CustomElement):
 
     _scripts = ['https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.1/highlight.min.js']
-    _styles = ['https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.1/styles/default.min.css']
+    _styles = ['https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.1/styles/tomorrow-night-bright.min.css']
 
     @classmethod
     def _js(cls):
