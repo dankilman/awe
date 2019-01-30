@@ -92,3 +92,9 @@ Once you're done with the initial page setup, call ``page.start()``. e.g:
 
     # This will prevent the default browser open behavior
     page.start(open_browser=False)
+
+Examples
+--------
+
+You can find many different examples of ``awe`` usage
+`here <https://s3.amazonaws.com/awe-static-files/examples/examples_page.html>`_.
