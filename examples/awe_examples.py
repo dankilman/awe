@@ -21,9 +21,10 @@ class HighlightJS(CustomElement):
 
 
 def main():
-    page = Page('Examples', width=900)
+    title = 'Awe Examples'
+    page = Page(title, width=900)
     page.register(HighlightJS)
-    page.new('h1').new_text('Examples')
+    page.new('h1').new_text(title)
     page.new_text('Examples page was created with awe.\n')
     collapse = page.new_collapse()
     for example in examples.examples_order:

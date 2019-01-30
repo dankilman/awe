@@ -1,5 +1,5 @@
 exported_examples = {
-    'examples_page': {},
+    'awe_examples': {},
     'hello_world': {
         'screenshot': [195, 0, 195 + 300, 50],
         'extension': 'png'

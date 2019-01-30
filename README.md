@@ -18,7 +18,7 @@ pip install awe
 
 ## Examples
 
-[Examples Page](https://s3.amazonaws.com/awe-static-files/examples/examples_page.html)
+[Examples Page](https://s3.amazonaws.com/awe-static-files/examples/awe_examples.html)
 
 ## Credits
 

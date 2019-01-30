@@ -97,4 +97,4 @@ Examples
 --------
 
 You can find many different examples of ``awe`` usage
-`here <https://s3.amazonaws.com/awe-static-files/examples/examples_page.html>`_.
+`here <https://s3.amazonaws.com/awe-static-files/examples/awe_examples.html>`_.
