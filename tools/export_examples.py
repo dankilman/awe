@@ -40,8 +40,6 @@ def export_setup():
 def export_examples():
     export_setup()
     for example, config in examples.exported_examples.items():
-        if example != 'awe_examples':
-            continue
         print('Processing {}, {}'.format(example, config))
         module = importlib.import_module('examples.{}'.format(example))
         thread = threading.Thread(target=module.main)
