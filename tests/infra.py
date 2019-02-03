@@ -58,7 +58,7 @@ def retry(attempts=5, interval=1):
 
 def _get_logs(driver):
     logs = driver.get_log('browser')
-    return _remove_browser_warnings(logs)
+    return _remove_known_log_entries(logs)
 
 
 @pytest.fixture()
@@ -93,9 +93,10 @@ def element_tester(driver, page):
     return tester
 
 
-def _remove_browser_warnings(logs):
+def _remove_known_log_entries(logs):
     messages = [
         'You are using the in-browser Babel transformer',
         'Replace text-decoration-skip',
+        '.chunk.'
     ]
     return [l for l in logs if not any(message in l['message'] for message in messages)]

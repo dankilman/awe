@@ -45,7 +45,7 @@ class Parser(object):
         element_type, additional_kwargs = self._parse_str(key)
         element_configuration['element_type'] = element_type
         element_configuration['kwargs'].update(additional_kwargs)
-        if isinstance(value, str):
+        if isinstance(value, six.string_types):
             if issubclass(element_type, view.Raw):
                 value = [{'Inline': value}]
             else:
@@ -58,7 +58,7 @@ class Parser(object):
             self._parse_element_configuration(element_configuration, element_type, value[0])
             value = value[1:]
         for item in value:
-            if isinstance(item, str) and not self._is_element_type(item):
+            if isinstance(item, six.string_types) and not self._is_element_type(item):
                 item = {'Inline': item}
             else:
                 item = self._normalize_element(item)
@@ -71,7 +71,7 @@ class Parser(object):
             return
         if not isinstance(configuration_items, list):
             raise ValueError('Element configuration should be passed as a list, got: {}'.format(configuration_items))
-        if isinstance(configuration_items[0], str):
+        if isinstance(configuration_items[0], six.string_types):
             result['field'] = configuration_items[0]
             configuration_items = configuration_items[1:]
         for item in configuration_items:
@@ -114,7 +114,7 @@ class Parser(object):
 
     def _process_input(self, node, context):
         input_node = self._process_intrinsic_functions(node['$'], context)
-        if isinstance(input_node, str):
+        if isinstance(input_node, six.string_types):
             input_node = [input_node]
         input_name = input_node[0]
         input_node = input_node[1:]
@@ -145,7 +145,7 @@ class Parser(object):
 
     @staticmethod
     def _normalize_element(obj):
-        if isinstance(obj, str):
+        if isinstance(obj, six.string_types):
             obj = {obj: None}
         elif isinstance(obj, list):
             obj = {'div': obj}
@@ -166,10 +166,10 @@ class Parser(object):
 
 
 def is_parsable(obj):
-    return isinstance(obj, (str, list, dict))
+    return isinstance(obj, (six.string_types, list, dict))
 
 
 def _prepare(obj):
-    if isinstance(obj, str):
+    if isinstance(obj, six.string_types):
         obj = yaml.load(obj)
     return obj

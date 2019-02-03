@@ -1,4 +1,4 @@
-from awe import api
+from awe.page import DEFAULT_WIDTH
 
 from ..infra import element_tester, driver, page
 
@@ -52,7 +52,7 @@ def test_button(element_tester):
         button3.find_element_by_class_name('anticon-up-circle')
         assert 'ant-btn-circle' in button4.get_attribute('class')
         assert 'ant-btn-primary' in button5.get_attribute('class')
-        assert button6.size['width'] == api.DEFAULT_WIDTH
+        assert button6.size['width'] == DEFAULT_WIDTH
         button1.click()
         assert state['button1_clicked']
         button2.click()

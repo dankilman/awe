@@ -7,7 +7,8 @@ import bottle
 
 class WebServer(object):
 
-    def __init__(self, exporter, port, custom_component, encoder):
+    def __init__(self, exporter, port, custom_component, encoder, api):
+        self._api = api
         self._port = port
         self._exporter = exporter
         self._custom_component = custom_component
@@ -16,11 +17,12 @@ class WebServer(object):
         self._client_root = exporter.client_root
         self._content_root = os.path.join(os.path.dirname(__file__), 'resources', self._client_root)
         self._app = bottle.Bottle()
-        self._app.route('/')(self._index)
-        self._app.route('/initial-state')(self._initial_state)
-        self._app.route('/export')(self._export)
-        self._app.route('/static/<path:path>')(self._get_static_file)
-        self._app.route('/custom-components')(self._components)
+        self._app.get('/', callback=self._index)
+        self._app.get('/initial-state', callback=self._initial_state)
+        self._app.get('/export', callback=self._export)
+        self._app.get('/static/<path:path>', callback=self._get_static_file)
+        self._app.get('/custom-components', callback=self._components)
+        self._api.register(self._app)
         self._thread = threading.Thread(target=self._run)
         self._thread.daemon = True
 

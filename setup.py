@@ -30,7 +30,8 @@ setup(
         'pyyaml',
         'txaio',
         'pydash',
-        'typing'
+        'typing',
+        'requests'
     ],
     include_package_data=True,
     zip_safe=False,

@@ -14,7 +14,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image
 
-from awe import api
+from awe import page
 import examples
 
 
@@ -47,10 +47,10 @@ def export_examples():
         terminate_after = config.get('terminate_after')
         if terminate_after:
             time.sleep(terminate_after)
-            api.page.close()
+            page.global_page.close()
         thread.join(timeout=300)
         with open(os.path.join(output_examples_dir, '{}.html'.format(example)), 'w') as f:
-            f.write(api.page.export())
+            f.write(page.global_page.export())
 
 
 @contextmanager

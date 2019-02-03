@@ -1,177 +1,186 @@
-import os
-import time
-import webbrowser
+from bottle import request
 
-from . import messages
-from . import registry
-from . import view
-from . import encoding
-from . import webserver
-from . import websocket
-from . import export
-from . import custom
-from . import parser
-from . import element_updater
-
-page = None
-
-DEFAULT_WIDTH = 1200
+_endpoints = {}
 
 
-class Page(view.Root):
+def _route(method, path):
+    def decorator(fn):
+        _endpoints.setdefault(method, {})[path] = fn.__name__
+        return fn
+    return decorator
 
-    def __init__(
-            self,
-            title='Awe',
-            port=8080,
-            width=None,
-            style=None,
-            export_fn=None,
-            offline=False,
-            serializers=None):
-        """
-        :param title: Page title.
-        :param port: Webserver port.
-        :param width: Set the page content width. (defaults to ``1200px``)
-        :param style: Set custom javascript style object.
-        :param export_fn: Override default export function.
-        :param offline: Offline mode means start/block don't do anything. Useful when exporting directly from python.
-        :param serializers: Custom serializers for custom element implementations.
-        """
-        super(Page, self).__init__(owner=self, element_id='root')
-        self._registry = registry.Registry()
-        self._register(self)
-        self._offline = (offline or os.environ.get('AWE_OFFLINE'))
-        self._port = port
-        self._title = title
-        self._style = self._set_default_style(style, width)
-        self._element_updater = element_updater.ElementUpdater()
-        self._parser = parser.Parser(
-            registry=self._registry
-        )
-        self._encoder = encoding.Encoder(
-            element_cls=view.Element,
-            serializers=serializers
-        )
-        self._message_handler = messages.MessageHandler(
-            registry=self._registry,
-            dispatch=self._dispatch
-        )
-        self._custom_component = custom.CustomComponentHandler(
-            registry=self._registry,
-            encoder=self._encoder
-        )
-        self._exporter = export.Exporter(
-            export_fn=export_fn,
-            get_initial_state=self._get_initial_state,
-            custom_component=self._custom_component,
-            encoder=self._encoder)
-        self._server = webserver.WebServer(
-            exporter=self._exporter,
-            port=port,
-            custom_component=self._custom_component,
-            encoder=self._encoder)
-        self._ws_server = websocket.WebSocketServer(
-            message_handler=self._message_handler,
-            encoder=self._encoder
-        )
-        self._started = False
-        self._version = 0
-        self._closed = False
-        if os.environ.get('AWE_SET_GLOBAL'):
-            global page
-            page = self
 
-    def start(self, block=False, open_browser=True, develop=False):
-        """
-        Start the page services.
+get = (lambda path: _route('GET', path))
+post = (lambda path: _route('POST', path))
+put = (lambda path: _route('PUT', path))
+delete = (lambda path: _route('DELETE', path))
 
-        :param block: Should the method invocation block. (default: ``False``)
-        :param open_browser: Should a new tab be opened in a browser pointing to the started page. (default: ``True``)
-        :param develop: During development, changes to port for open browser to ``3000``.
-               (due to npm start, default ``False``)
-        """
-        if self._started:
-            return
-        if self._offline:
-            self._element_updater.start()
-            return
-        self._message_handler.start()
-        self._server.start()
-        self._ws_server.start()
-        self._element_updater.start()
-        self._started = True
-        if open_browser:
-            port = 3000 if (develop or os.environ.get('AWE_DEVELOP')) else self._port
-            webbrowser.open_new_tab('http://localhost:{}'.format(port))
-        if block:
-            self.block()
 
-    def export(self, export_fn=None):
-        """
-        Export current page state into a static html.
+class API(object):
 
-        :param export_fn: Override the export_fn supplied during page creation. (if any)
-        :return: The exporter result.
-        """
-        return self._exporter.export(export_fn)
+    def __init__(self, registry, encoder, message_handler):
+        self._prefix = '/api'
+        self._registry = registry
+        self._encoder = encoder
+        self._message_handler = message_handler
 
-    def block(self):
-        """
-        Utility method to block after page has been started.
-        """
-        if self._offline:
-            return
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            pass
+    def _callback_wrapper(self, callback):
+        def wrapper(*args, **kwargs):
+            request.content_type = 'application/json'
+            result = callback(*args, **kwargs)
+            return self._encoder.to_json(result)
+        return wrapper
 
-    def close(self):
-        self._closed = True
+    def register(self, app):
+        for method, method_endpoints in _endpoints.items():
+            for endpoint, fn_name in method_endpoints.items():
+                endpoint = '{}{}'.format(self._prefix, endpoint)
+                app.route(endpoint, method=method, callback=self._callback_wrapper(getattr(self, fn_name)))
 
-    def _get_initial_state(self):
+    @get('/status')
+    def _status(self):
+        return {'status': 'alive'}
+
+    @get('/elements')
+    def _get_elements(self):
+        query = request.query
+        include_data = query.get('include_data', '').lower() == 'true'
+        include_props = query.get('include_props', '').lower() == 'true'
         return {
-            'roots': self._registry.get_roots(),
-            'variables': self._registry.get_variables(),
-            'version': self._version,
-            'style': self._style,
-            'title': self._title,
+            'elements': {
+                eid: self._get_element(eid, include_data=include_data, include_props=include_props)
+                for eid in self._registry.elements
+            }
         }
 
-    def _increase_version(self):
-        self._version += 1
+    @get('/elements/<element_id>')
+    def _get_element(self, element_id, include_data=True, include_props=True):
+        e = self._registry.elements[element_id]
+        result = {
+            'id': e.id,
+            'root_id': e.root_id,
+            'element_type': e.element_type,
+            'parent_id': e.parent.id if e.parent else None,
+            'index': e.index,
+            'children_ids': [c.id for c in e.children],
+            'prop_children': e._prop_children
+        }
+        if include_data:
+            result['data'] = e.data
+        if include_props:
+            result['props'] = e.props
+        return result
 
-    def _register(self, obj, obj_id=None):
-        if isinstance(obj, element_updater.Updater):
-            self._element_updater.add(obj)
+    @post('/elements')
+    @put('/elements/<element_id>')
+    def _new_element(self, element_id=None):
+        body = request.json
+        root_id = body.get('root_id')
+        parent_id = body.get('parent_id')
+        new_root = body.get('new_root')
+        obj = body.get('obj')
+        params = body.get('params') or {}
+        assert obj
+        assert not (root_id and parent_id)
+        assert not (root_id and new_root)
+        if parent_id:
+            parent = self._registry.elements[parent_id]
+        elif new_root:
+            parent = self._registry.roots['root']._new_root()
         else:
-            self._registry.register(obj, obj_id)
+            parent = self._registry.roots[root_id or 'root']
+        element = parent.new(obj, id=element_id, **params)
+        return self._get_element(element.id)
 
-    def _unregister(self, obj, obj_id=None):
-        self._registry.unregister(obj, obj_id)
+    @delete('/elements/<element_id>')
+    def _remove_element(self, element_id):
+        element = self._registry.elements[element_id]
+        element.remove()
+        return {'id': element_id, 'status': 'success'}
 
-    def _dispatch(self, action, client_id=None):
-        if self._closed:
-            raise RuntimeError('page is closed')
-        self._increase_version()
-        if not self._started:
-            return
-        action['version'] = self._version
-        self._ws_server.dispatch_from_thread(action, client_id)
-
-    def _parse(self, obj, context):
-        return self._parser.parse(obj, context)
-
-    @staticmethod
-    def _set_default_style(style, width):
-        style = style or {}
-        defaults = {
-            'width': width or DEFAULT_WIDTH,
-            'paddingTop': '6px',
-            'paddingBottom': '6px'
+    @put('/elements/<element_id>/prop/<prop_name>')
+    def _new_prop(self, element_id, prop_name):
+        element = self._registry.elements[element_id]
+        result = element.new_prop(prop_name)
+        return {
+            'name': prop_name,
+            'id': result.id
         }
-        for key, default in defaults.items():
-            style.setdefault(key, default)
-        return style
+
+    @put('/elements/<element_id>/data')
+    def _update_data(self, element_id):
+        element = self._registry.elements[element_id]
+        body = request.json
+        data = body.get('data')
+        assert data
+        element.update_data(data)
+        return {'id': element_id, 'status': 'success'}
+
+    @put('/elements/<element_id>/props')
+    def _update_props(self, element_id):
+        element = self._registry.elements[element_id]
+        body = request.json
+        props = body.get('props')
+        prop_path = body.get('path')
+        prop_value = body.get('value')
+        assert props or (prop_path and prop_value)
+        assert not (props and (prop_path or prop_value))
+        if props:
+            element.update_props(props)
+        else:
+            element.update_prop(prop_path, prop_value)
+        return {'id': element_id, 'status': 'success'}
+
+    @post('/elements/<element_id>/call/<method>')
+    def _call_method(self, element_id, method):
+        element = self._registry.elements[element_id]
+        body = request.json
+        kwargs = body.get('kwargs') or {}
+        if method.startswith('_'):
+            raise RuntimeError('cannot call private methods')
+        assert hasattr(element, method)
+        fn = getattr(element, method)
+        fn(**kwargs)
+        return {'id': element_id, 'status': 'success'}
+
+    @get('/variables')
+    def _get_variables(self):
+        return {'variables': self._registry.get_variables()}
+
+    @get('/variables/<variable_id>')
+    def _get_variable(self, variable_id):
+        return self._registry.variables[variable_id].get_variable()
+
+    @post('/variables')
+    @put('/variables/<variable_id>')
+    def _new_variable(self, variable_id=None):
+        body = request.json
+        value = body.get('value')
+        assert value
+        result = self._registry.roots['root']._new_variable(value, variable_id)
+        return result.get_variable()
+
+    @post('/variables/<variable_id>')
+    def _update_variable(self, variable_id):
+        body = request.json
+        value = body.get('value')
+        assert variable_id in self._registry.variables
+        assert value
+        self._message_handler.handle({
+            'type': 'updateVariable',
+            'variableId': variable_id,
+            'value': value
+        })
+        return {'id': variable_id, 'status': 'success'}
+
+    @post('/functions/<function_id>')
+    def _call_function(self, function_id):
+        body = request.json
+        kwargs = body.get('kwargs') or {}
+        assert function_id in self._registry.functions
+        self._message_handler.handle({
+            'type': 'call',
+            'functionId': function_id,
+            'kwargs': kwargs
+        })
+        return {'id': function_id, 'status': 'success'}

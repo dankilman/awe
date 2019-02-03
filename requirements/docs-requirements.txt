@@ -6,3 +6,4 @@ pyyaml
 txaio
 pydash
 typing
+requests

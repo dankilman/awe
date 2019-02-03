@@ -1,3 +1,5 @@
+from typing import Dict, ClassVar, Callable  # noqa
+
 from . import view
 from . import variables
 
@@ -5,11 +7,11 @@ from . import variables
 class Registry(object):
 
     def __init__(self):
-        self.elements = {}
-        self.element_types = {}
-        self.functions = {}
-        self.variables = {}
-        self.roots = {}
+        self.elements = {}  # type: Dict[str, view.Element]
+        self.element_types = {}  # type: Dict[str, ClassVar[view.Element]]
+        self.functions = {}  # type: Dict[str, Callable]
+        self.variables = {}  # type: Dict[str, variables.Variable]
+        self.roots = {}  # type: Dict[str, view.Root]
 
     def register(self, obj, obj_id=None):
         obj_id, store = self._get_id_and_store(obj, obj_id)

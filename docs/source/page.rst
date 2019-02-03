@@ -1,4 +1,4 @@
 Page
 ====
-.. autoclass:: awe.api.Page
+.. autoclass:: awe.page.Page
     :members:
