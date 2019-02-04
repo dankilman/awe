@@ -13,7 +13,7 @@ window.Component = Component;
 window.Babel = Babel;
 window.antd = antd;
 
-Awe.start({store, initialState: window.frozenState});
+Awe.start({store, port: window.aweWebsocketPort, initialState: window.frozenState});
 ReactDOM.render(
   <Provider store={store}>
     <App/>

@@ -7,9 +7,11 @@ import bottle
 
 class WebServer(object):
 
-    def __init__(self, exporter, port, custom_component, encoder, api):
+    def __init__(self, exporter, host, port, websocket_port, custom_component, encoder, api):
         self._api = api
+        self._host = host
         self._port = port
+        self._websocket_port = websocket_port
         self._exporter = exporter
         self._custom_component = custom_component
         self._encoder = encoder
@@ -30,10 +32,11 @@ class WebServer(object):
         self._thread.start()
 
     def _run(self):
-        bottle.run(self._app, port=self._port)
+        bottle.run(self._app, host=self._host, port=self._port)
 
     def _index(self):
-        return self._get_static_file('index.html')
+        bottle.response.content_type = 'text/html'
+        return self._exporter.get_index_html(websocket_port=self._websocket_port)
 
     def _get_static_file(self, path):
         return bottle.static_file(path, self._content_root)

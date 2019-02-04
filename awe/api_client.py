@@ -1,9 +1,14 @@
 import requests
 
 
+DEFAULT_HOST = '127.0.0.1'
+DEFAULT_PORT = 8080
+DEFAULT_WEBSOCKET_PORT = 9000
+
+
 class APIClient(object):
 
-    def __init__(self, host='127.0.0.1', port=8080):
+    def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT):
         """
         REST API client.
 
@@ -12,9 +17,9 @@ class APIClient(object):
         :param host: ``awe`` server host.
         :param port: ``awe`` server port.
         """
-        self.host = host
-        self.port = port
-        self._base_url = 'http://{}:{}/api'.format(host, port)
+        self.host = host or DEFAULT_HOST
+        self.port = port or DEFAULT_PORT
+        self._base_url = 'http://{}:{}/api'.format(self.host, self.port)
 
     def get_status(self):
         """
@@ -49,7 +54,7 @@ class APIClient(object):
         :param obj: The ``obj`` argument as expected by the ``new()`` method.
         :param params: Params to pass on to the ``new()`` method invocation.
         :param element_id: Optionally specify an ``element_id``. (one will be generated otherwise)
-        :param root_id: Optionally specify a different root to created the element under.
+        :param root_id: Optionally specify a different root to create the element under.
                         If not specified, and ``parent_id`` is not supplied, the main ``page`` root will be used.
         :param parent_id: Optionally specify the element to call the ``new()`` method on.
         :param new_root: Pass ``True`` to create the element under a new root.

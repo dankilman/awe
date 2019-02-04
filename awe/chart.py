@@ -1,5 +1,7 @@
 import time
 
+import six
+
 from .view import Element, builtin
 
 number_types = (int, float)
@@ -269,7 +271,7 @@ class Chart(Element):
         elif isinstance(transformer, dict):
             transformer_key = transformer.pop('type')
             return transformer_classes[transformer_key](**transformer)
-        if isinstance(transformer, str):
+        if isinstance(transformer, six.string_types):
             if transformer in transformers:
                 return transformers[transformer]
             maybe_dict_transformer = DictLevelsTransformer.from_str(transformer)

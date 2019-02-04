@@ -9,4 +9,5 @@ Documentation
     custom
     dsl
     export
+    cli
     rest

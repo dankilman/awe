@@ -1,6 +1,7 @@
 from collections import deque
 
 import pydash
+import six
 from typing import List  # noqa
 
 from . import variables
@@ -348,7 +349,7 @@ class Element(object):
                     ``['A', 'b', 'c']``.
         :param value: The value to set in the nested prop path.
         """
-        if isinstance(path, str):
+        if isinstance(path, six.string_types):
             path = [path]
         pydash.set_(self.props, path, value)
         self.update_element(path=['props'] + path, action='set', data=value)

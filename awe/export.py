@@ -16,6 +16,7 @@ def resource_regex_pattern(prefix, extension):
 
 
 frozen_state_format = 'window.frozenState={}'.format
+awe_websocket_port_format = 'window.aweWebsocketPort={}'.format
 favicon = '/static/favicon.ico'
 index_resources = [
     ('1', 'css'),
@@ -50,6 +51,12 @@ class Exporter(object):
             '<script type="text/babel" src="/custom-components"></script>',
             self.custom_component.combined_script_with_script_tag(), 1)
         return export_fn(index)
+
+    def get_index_html(self, websocket_port):
+        return self.index.replace(
+            awe_websocket_port_format('null'),
+            awe_websocket_port_format(websocket_port)
+        )
 
     @staticmethod
     def default_export_fn(index_html):

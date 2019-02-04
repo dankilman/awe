@@ -3,12 +3,12 @@ import {updateElementActions} from './store';
 import components from './components';
 
 class Awe {
-  constructor({store, host, port}) {
+  constructor({store, port}) {
     this.store = store;
     this.finishedInitialFetch = false;
     this.clientId = null;
     this.pendingActions = [];
-    this.ws = new WebSocket(`ws://${host}:${port}`);
+    this.ws = new WebSocket(`ws://${window.location.hostname}:${port}`);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = (error) => console.error('ws error', error);
     Awe.fetchInitialState().then((initialState) => {
@@ -24,7 +24,7 @@ class Awe {
     });
   }
 
-  static start({store, host = '127.0.0.1', port = 9000, initialState}) {
+  static start({store, port, initialState}) {
     let instance;
     if (initialState) {
       const notSupported = () => console.warn('This is not supported in offline mode');
@@ -37,7 +37,7 @@ class Awe {
         Awe.processInitialState(store, initialState);
       }, 0);
     } else {
-      instance = new Awe({store, host, port});
+      instance = new Awe({store, port});
     }
 
     const loadingScripts = [];

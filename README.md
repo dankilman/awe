@@ -31,6 +31,7 @@ Your contributions to this world are greatly appreciated.
 - [txaio (MIT)](https://github.com/crossbario/txaio)
 - [pydash (MIT)](https://github.com/dgilland/pydash)
 - [requests (Apache License, Version 2.0)](https://github.com/requests/requests)
+- [click (BSD)](https://github.com/pallets/click)
 - [react (MIT)](https://github.com/facebook/react)
 - [redux (MIT)](https://github.com/reduxjs/redux)
 - [ant-design (MIT)](https://github.com/ant-design/ant-design)

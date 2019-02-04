@@ -31,8 +31,14 @@ setup(
         'txaio',
         'pydash',
         'typing',
-        'requests'
+        'requests',
+        'click'
     ],
     include_package_data=True,
     zip_safe=False,
+    entry_points={
+        'console_scripts': [
+                'awe = awe.cli:cli'
+        ]
+    }
 )

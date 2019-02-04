@@ -7,3 +7,5 @@ txaio
 pydash
 typing
 requests
+click
+sphinx-click

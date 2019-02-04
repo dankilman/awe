@@ -13,18 +13,25 @@ from . import export
 from . import custom
 from . import parser
 from . import element_updater
+from . import api_client
 
 global_page = None
 
 DEFAULT_WIDTH = 1200
+DEFAULT_TITLE = 'Awe'
+DEFAULT_HOST = api_client.DEFAULT_HOST
+DEFAULT_PORT = api_client.DEFAULT_PORT
+DEFAULT_WEBSOCKET_PORT = api_client.DEFAULT_WEBSOCKET_PORT
 
 
 class Page(view.Root):
 
     def __init__(
             self,
-            title='Awe',
-            port=8080,
+            title=DEFAULT_TITLE,
+            host=DEFAULT_HOST,
+            port=DEFAULT_PORT,
+            websocket_port=DEFAULT_WEBSOCKET_PORT,
             width=None,
             style=None,
             export_fn=None,
@@ -32,7 +39,9 @@ class Page(view.Root):
             serializers=None):
         """
         :param title: Page title.
+        :param host: Webserver/Websocket host.
         :param port: Webserver port.
+        :param websocket_port: Websocket port.
         :param width: Set the page content width. (defaults to ``1200px``)
         :param style: Set custom javascript style object.
         :param export_fn: Override default export function.
@@ -75,11 +84,15 @@ class Page(view.Root):
         )
         self._server = webserver.WebServer(
             exporter=self._exporter,
+            host=host,
             port=port,
+            websocket_port=websocket_port,
             custom_component=self._custom_component,
             encoder=self._encoder,
             api=self._api)
         self._ws_server = websocket.WebSocketServer(
+            host=host,
+            port=websocket_port,
             message_handler=self._message_handler,
             encoder=self._encoder
         )
@@ -131,12 +144,13 @@ class Page(view.Root):
         if self._offline:
             return
         try:
-            while True:
+            while not self._closed:
                 time.sleep(1)
         except KeyboardInterrupt:
             pass
 
     def close(self):
+        # TODO actually close things
         self._closed = True
 
     def _get_initial_state(self):

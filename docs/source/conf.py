@@ -1,7 +1,11 @@
 project = 'awe'
 copyright = '2019, Dan Kilman'
 author = 'Dan Kilman'
-extensions = ['sphinx.ext.viewcode', 'sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc',
+    'sphinx_click.ext'
+]
 master_doc = 'index'
 html_static_path = ['_static']
 html_theme = 'alabaster'

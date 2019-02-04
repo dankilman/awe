@@ -166,7 +166,7 @@ class Parser(object):
 
 
 def is_parsable(obj):
-    return isinstance(obj, (six.string_types, list, dict))
+    return isinstance(obj, six.string_types + (list, dict))
 
 
 def _prepare(obj):

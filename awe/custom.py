@@ -1,4 +1,4 @@
-from six import StringIO
+from six import StringIO, string_types
 
 
 class CustomComponentHandler(object):
@@ -39,14 +39,14 @@ class CustomComponentHandler(object):
 
     @staticmethod
     def _get_style_def(style):
-        if isinstance(style, str):
+        if isinstance(style, string_types):
             style = {'href': style}
         style.setdefault('rel', 'stylesheet')
         return style
 
     @staticmethod
     def _get_script_def(script):
-        if isinstance(script, str):
+        if isinstance(script, string_types):
             script = {'src': script}
         script.setdefault('type', 'text/javascript')
         return script

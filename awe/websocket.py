@@ -44,7 +44,7 @@ class Connection(websocket.WebSocketServerProtocol):
 
 class WebSocketServer(websocket.WebSocketServerFactory):
 
-    def __init__(self, message_handler, encoder, host='127.0.0.1', port=9000):
+    def __init__(self, message_handler, encoder, host, port):
         super(WebSocketServer, self).__init__('ws://{}:{}'.format(host, port))
         self.protocol = Connection
         self.config = {'host': host, 'port': port}
