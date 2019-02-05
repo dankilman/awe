@@ -27,12 +27,22 @@ def test_input(element_tester):
         element1 = driver.find_element_by_class_name(input1_class)
         element2 = driver.find_element_by_class_name(input2_class)
         element3 = driver.find_element_by_class_name(input3_class)
+        state['element3'] = element3
         for e in [element1, element2, element3]:
             assert e.tag_name == 'input'
             assert e.get_attribute('type') == 'text'
         assert element2.get_attribute('placeholder') == placeholder_text
-        element3.send_keys('{}\n'.format(input3_typed_text))
+
+    def type_text(page):
+        state['element3'].send_keys('{}\n'.format(input3_typed_text))
+
+    def assert_typed_text(driver):
         assert state['input3_value'] == input3_typed_text
         assert state['input2'] is state['input2_injected']
 
-    element_tester(builder, finder)
+    element_tester(
+        builder,
+        finder,
+        type_text,
+        assert_typed_text
+    )
