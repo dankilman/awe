@@ -8,7 +8,7 @@ class Awe {
     this.finishedInitialFetch = false;
     this.clientId = null;
     this.pendingActions = [];
-    this.ws = new WebSocket(`ws://${window.location.hostname}:${port}`);
+    this.ws = new WebSocket(`ws://${window.location.hostname}:${port || 9000}`);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = (error) => console.error('ws error', error);
     Awe.fetchInitialState().then((initialState) => {

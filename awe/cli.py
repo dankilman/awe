@@ -113,9 +113,9 @@ def get(ctx, element_id):
 @option('-o', '--obj', required=True, help='Element definition.')
 @option('-p', '--params', help='Keyword arguments to use when creating ``obj``.')
 @option('-e', '--element-id', help='Optionally specify an element ID. (one will be generated otherwise)')
-@option('-r', '--root-id', help="Optionally specify a different root to creat the element under. "
-                                "If not specified, and ``parent_id`` is not supplied, the main ``page`` root "
-                                "will be used.")
+@option('-r', '--root-id', help='Optionally specify a different root to creat the element under. '
+                                'If not specified, and ``parent_id`` is not supplied, the main ``page`` root '
+                                'will be used.')
 @option('-c', '--parent-id', help='Optionally specify the element create the new element under.')
 @option('-n', '--new-root', is_flag=True, help='Create element under a new root.')
 @click.pass_obj

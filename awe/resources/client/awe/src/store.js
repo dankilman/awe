@@ -65,12 +65,11 @@ const updateElementActions = {
 };
 
 function processElement(map, element, rootId) {
-  const {children, id} = element;
+  const {children} = element;
   element.rootId = rootId;
   map = newElement(map, element);
   if (children) {
     for (const child of children) {
-      child.parentId = id;
       map = processElement(map, child, rootId);
     }
   }

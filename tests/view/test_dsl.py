@@ -7,6 +7,7 @@ def test_dsl(element_tester):
     def builder(page):
         top_level = page.new('''
             - Text: [[text1, text: Text 1, className: text1]]
+            - Card: [[card1, className: card1]]
         ''')
         state['top_level'] = top_level
 
@@ -27,9 +28,21 @@ def test_dsl(element_tester):
         assert text_element.text == 'Text 11'
         assert text_element2.text == 'Text 2'
 
+    def add_child_to_card(page):
+        top_level = state['top_level']
+        card = top_level.ref.card1
+        card.new('Text: [[text: Hello, className: text3]]')
+
+    def find_child_text(driver):
+        card_element = driver.find_element_by_class_name('card1')
+        child_text_element = card_element.find_element_by_class_name('text3')
+        assert child_text_element.text == 'Hello'
+
     element_tester(
         builder,
         finder,
         dynamic_change,
-        verify_change
+        verify_change,
+        add_child_to_card,
+        find_child_text,
     )

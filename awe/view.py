@@ -406,18 +406,6 @@ class Element(object):
         """
         pass
 
-    def _get_view(self):
-        return {
-            'id': self.id,
-            'rootId': self.root_id,
-            'index': self.index,
-            'elementType': self.element_type,
-            'data': self.data,
-            'children': [t._get_view() for t in self.children],
-            'props': self.props,
-            'propChildren': self._prop_children
-        }
-
     def _get_new_element_action(self):
         return {
             'type': 'newElement',
@@ -430,6 +418,12 @@ class Element(object):
             'props': self.props,
             'propChildren': self._prop_children
         }
+
+    def _get_view(self):
+        result = self._get_new_element_action()
+        result.pop('type')
+        result['children'] = [t._get_view() for t in self.children]
+        return result
 
     def _new_children(self, element_configuration, **kwargs):
         element_configuration['kwargs'].update(kwargs)
