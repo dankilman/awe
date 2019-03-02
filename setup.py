@@ -27,6 +27,7 @@ setup(
         'bottle',
         'autobahn[twisted]',
         'twisted',
+        'service_identity',
         'pyyaml',
         'txaio',
         'pydash',
