@@ -31,7 +31,7 @@ setup(
         'pyyaml',
         'txaio',
         'pydash',
-        'typing',
+        'typing;python_version<"3.7"',
         'requests',
         'click'
     ],
