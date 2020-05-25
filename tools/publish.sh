@@ -57,7 +57,7 @@ tag()
 publish_pypi()
 {
     echo "Uploading to pypi"
-    twine upload "${dist_file}"
+    twine upload --repository awe "${dist_file}"
 }
 
 gzip_static_files()
