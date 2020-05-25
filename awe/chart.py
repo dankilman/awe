@@ -166,8 +166,8 @@ class DictLevelsTransformer(Transformer):
 
     @property
     def key(self):
-        from_key = ''.join(str(l) for l in self._chart_mapping)
-        to_key = ''.join(str(l) for l in self._series_mapping)
+        from_key = ''.join(str(k) for k in self._chart_mapping)
+        to_key = ''.join(str(k) for k in self._series_mapping)
         return '{}to{}'.format(from_key, to_key)
 
     def transform(self, data):
@@ -202,8 +202,8 @@ class DictLevelsTransformer(Transformer):
 
     def _process_path(self, chart_dict, now, path, value):
         level_to_key = {i+1: level for i, level in enumerate(path)}
-        chart_key = ' '.join(level_to_key[l] for l in self._chart_mapping)
-        series_key = ' '.join(level_to_key[l] for l in self._series_mapping)
+        chart_key = ' '.join(level_to_key[k] for k in self._chart_mapping)
+        series_key = ' '.join(level_to_key[k] for k in self._series_mapping)
         current_chart = chart_dict.setdefault(chart_key, {})
         series_data = current_chart.setdefault(series_key, [])
         series_data.append((now, value))
