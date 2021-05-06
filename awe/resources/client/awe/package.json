@@ -9,7 +9,7 @@
     "@babel/standalone": "^7.2.5",
     "antd": "^3.12.3",
     "downloadjs": "^1.4.7",
-    "highcharts": "^7.0.0",
+    "highcharts": "^9.0.0",
     "highcharts-react-official": "^2.0.0",
     "immutable": "^4.0.0-rc.12",
     "lodash": "^4.17.11",
