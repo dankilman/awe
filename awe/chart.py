@@ -249,6 +249,23 @@ class Chart(Element):
             data=transformed_data
         )
 
+    def set(self, data):
+        """
+        Override existing chart data with new data.
+
+        :param data: A list of data items. Each data item is expected to match the format the transformer expects.
+                     A data item may also be supplied in the form of a 2-tuple (or a list) of (time, data),
+                     in which case, the first item is the epoch time in seconds with ms precision and
+                     the second item is the data item itself.
+        """
+        transformed_data = self.transformer.transform(data)
+        self.data['data'] = transformed_data
+        self.update_element(
+            path=['data', 'data'],
+            action='set',
+            data=transformed_data
+        )
+
     @property
     def transformer(self):
         """

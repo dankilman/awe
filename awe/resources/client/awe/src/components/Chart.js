@@ -60,7 +60,7 @@ class Chart extends Component {
       };
       let finalOptions;
       if (Object.keys(options || {}).length > 0) {
-        lodash.defaultsDeep(options, [defaultOptions]);
+        lodash.defaultsDeep(options, defaultOptions);
         finalOptions = options;
       } else {
         finalOptions = defaultOptions;
