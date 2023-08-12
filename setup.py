@@ -28,7 +28,7 @@ setup(
         'autobahn[twisted]',
         'twisted',
         'service_identity',
-        'pyyaml<6',
+        'pyyaml',
         'txaio',
         'pydash',
         'typing;python_version<"3.7"',
