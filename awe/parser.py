@@ -171,5 +171,5 @@ def is_parsable(obj):
 
 def _prepare(obj):
     if isinstance(obj, six.string_types):
-        obj = yaml.load(obj)
+        obj = yaml.safe_load(obj)
     return obj
